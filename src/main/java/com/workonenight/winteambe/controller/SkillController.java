@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController(value = "/skill")
+@RestController
+@RequestMapping(value = "/skill")
 public class SkillController {
 
     private final SkillService skillService;
@@ -19,14 +20,17 @@ public class SkillController {
     public List<SkillDTO> getAllSkill() {
         return skillService.getAllSkill();
     }
+
     @GetMapping(value = "/list/{id}")
-    public SkillDTO getSkyllById(@PathVariable("id") String id) {
+    public SkillDTO getSkillById(@PathVariable("id") String id) {
         return skillService.getSkillById(id);
     }
+
     @PostMapping(value = "/create")
     public SkillDTO createSkill(@RequestBody SkillDTO skillDTO) {
         return skillService.createSkill(skillDTO);
     }
+
     @PostMapping(value = "/update")
     public SkillDTO updateSkill(@RequestBody SkillDTO skillDTO) {
         return skillService.updateSkill(skillDTO);

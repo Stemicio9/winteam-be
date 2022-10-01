@@ -6,7 +6,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController(value = "/user")
+@RestController
+@RequestMapping(value = "/user")
 public class UserController {
 
     private final UserService userService;
@@ -19,6 +20,7 @@ public class UserController {
     public List<UserDTO> getAllUser() {
         return userService.getAllUser();
     }
+
     @GetMapping(value = "/list/{id}")
     public UserDTO getUserById(@PathVariable("id") String id) {
         return userService.getUserById(id);
@@ -28,6 +30,7 @@ public class UserController {
     public UserDTO createUser(@RequestBody UserDTO userDTO) {
         return userService.createUser(userDTO);
     }
+
     @PostMapping(value = "/update")
     public UserDTO updateUser(@RequestBody UserDTO userDTO) {
         return userService.updateUser(userDTO);
