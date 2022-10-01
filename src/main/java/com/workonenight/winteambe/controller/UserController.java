@@ -4,6 +4,7 @@ import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @RestController
@@ -31,8 +32,18 @@ public class UserController {
         return userService.createUser(userDTO);
     }
 
+    @GetMapping(value = "/register")
+    public UserDTO registerUser(HttpServletRequest request) {
+        return userService.registerUser(request);
+    }
+
     @PostMapping(value = "/update")
     public UserDTO updateUser(@RequestBody UserDTO userDTO) {
         return userService.updateUser(userDTO);
+    }
+
+    @GetMapping(value="/me")
+    public UserDTO getMe(HttpServletRequest request) {
+        return userService.getMe(request);
     }
 }

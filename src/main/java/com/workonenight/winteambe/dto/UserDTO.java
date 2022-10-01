@@ -2,15 +2,18 @@ package com.workonenight.winteambe.dto;
 
 import com.workonenight.winteambe.entity.User;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class UserDTO {
     private String id;
     private String firstName;
     private String lastName;
+    private String email;
     //role id to join in the role collection
     private String roleId;
     private String description;
@@ -37,11 +40,17 @@ public class UserDTO {
 
     private boolean enabledAnnunci;
 
+    public UserDTO(String id) {
+        this.id = id;
+    }
+
+
     public User toEntity(){
         User user = new User();
         user.setId(this.id);
         user.setFirstName(this.firstName);
         user.setLastName(this.lastName);
+        user.setEmail(this.email);
         user.setRoleId(this.roleId);
         user.setDescription(this.description);
         user.setBrief(this.brief);

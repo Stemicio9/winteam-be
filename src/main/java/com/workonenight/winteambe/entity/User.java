@@ -2,6 +2,7 @@ package com.workonenight.winteambe.entity;
 
 import com.workonenight.winteambe.dto.UserDTO;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @Document(collection = "users")
 public class User {
 
@@ -16,6 +18,7 @@ public class User {
     private String id;
     private String firstName;
     private String lastName;
+    private String email;
     //role id to join in the role collection
     private String roleId;
     private String description;
@@ -39,11 +42,17 @@ public class User {
     private boolean verified;
     private List<String> influencedUserList;
 
+    public User(String id, String email){
+        this.id = id;
+        this.email = email;
+    }
+
     public UserDTO toDTO(){
         UserDTO userDTO = new UserDTO();
         userDTO.setId(this.id);
         userDTO.setFirstName(this.firstName);
         userDTO.setLastName(this.lastName);
+        userDTO.setEmail(this.email);
         userDTO.setRoleId(this.roleId);
         userDTO.setDescription(this.description);
         userDTO.setBrief(this.brief);
@@ -70,6 +79,7 @@ public class User {
     public User toUpdateEntity(UserDTO userDTO){
         this.firstName = userDTO.getFirstName();
         this.lastName = userDTO.getLastName();
+        this.email = userDTO.getEmail();
         this.roleId = userDTO.getRoleId();
         this.description = userDTO.getDescription();
         this.brief = userDTO.getBrief();
@@ -91,5 +101,6 @@ public class User {
         this.influencedUserList = userDTO.getInfluencedUserList();
         return this;
     }
+
 
 }
