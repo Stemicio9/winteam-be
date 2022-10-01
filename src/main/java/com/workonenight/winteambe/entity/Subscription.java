@@ -17,8 +17,6 @@ public class Subscription {
     private double price;
     private boolean searchEnabled;
     private String imageLink;
-
-
     public SubscriptionDTO toDTO(){
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
         subscriptionDTO.setId(this.id);
@@ -29,5 +27,15 @@ public class Subscription {
         subscriptionDTO.setSearchEnabled(this.searchEnabled);
         subscriptionDTO.setImageLink(this.imageLink);
         return subscriptionDTO;
+    }
+
+    public Subscription toUpdateEntity(SubscriptionDTO subscriptionDTO){
+        this.name = subscriptionDTO.getName();
+        this.numAnnunci = subscriptionDTO.getNumAnnunci();
+        this.numberOfDays = subscriptionDTO.getNumberOfDays();
+        this.price = subscriptionDTO.getPrice();
+        this.searchEnabled = subscriptionDTO.isSearchEnabled();
+        this.imageLink = subscriptionDTO.getImageLink();
+        return this;
     }
 }

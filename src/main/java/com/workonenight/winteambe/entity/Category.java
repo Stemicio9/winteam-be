@@ -22,5 +22,11 @@ public class Category {
         return categoryDTO;
     }
 
+    public Category toUpdateEntity(CategoryDTO categoryDTO){
+        this.name = categoryDTO.getName();
+        this.imageLink = categoryDTO.getImageLink();
+        return this;
+    }
+
 
 }

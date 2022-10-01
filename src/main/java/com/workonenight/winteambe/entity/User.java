@@ -67,4 +67,29 @@ public class User {
         return userDTO;
     }
 
+    public User toUpdateEntity(UserDTO userDTO){
+        this.firstName = userDTO.getFirstName();
+        this.lastName = userDTO.getLastName();
+        this.roleId = userDTO.getRoleId();
+        this.description = userDTO.getDescription();
+        this.brief = userDTO.getBrief();
+        this.skillList = userDTO.getSkillList();
+        this.availabilityDays = userDTO.getAvailabilityDays();
+        this.availabilityHourSlots = userDTO.getAvailabilityHourSlots();
+        this.availabilityCities = userDTO.getAvailabilityCities();
+        this.address = userDTO.getAddress();
+        this.city = userDTO.getCity();
+        this.province = userDTO.getProvince();
+        this.nation = userDTO.getNation();
+        this.phoneNumber = userDTO.getPhoneNumber();
+        this.imageLink = userDTO.getImageLink();
+        this.contatoreAnnunci = userDTO.getContatoreAnnunci();
+        this.subscriptionId = userDTO.getSubscriptionId();
+        this.lastSubscriptionDate = userDTO.getLastSubscriptionDate();
+        this.companyTypeId = userDTO.getCompanyTypeId();
+        this.verified = userDTO.isVerified();
+        this.influencedUserList = userDTO.getInfluencedUserList();
+        return this;
+    }
+
 }

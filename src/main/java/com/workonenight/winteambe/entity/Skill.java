@@ -22,4 +22,10 @@ public class Skill {
         return skillDTO;
     }
 
+    public Skill toUpdateEntity(SkillDTO skillDTO){
+        this.name = skillDTO.getName();
+        this.imageLink = skillDTO.getImageLink();
+        return this;
+    }
+
 }
