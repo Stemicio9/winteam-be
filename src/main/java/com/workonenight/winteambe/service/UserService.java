@@ -5,6 +5,7 @@ import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.UserRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
+import com.workonenight.winteambe.utils.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -59,11 +60,15 @@ public class UserService {
         return null;
     }
 
-    public UserDTO registerUser(HttpServletRequest request) {
+    public UserDTO registerUser(HttpServletRequest request, String role) {
         User user = firebaseService.getMinimalUser(request);
-        log.info("Registering user: " + user.getEmail());
-        userRepository.save(user);
-        return user.toDTO();
+        if (user != null) {
+            user.setRoleId(UserType.isRole(role) ? role : UserType.LAVORATORE);
+            log.info("Registering user: " + user.getEmail());
+            return userRepository.save(user).toDTO();
+        }
+        log.error("Error during user registration");
+        return null;
     }
 
     public Page<UserDTO> getPageFiltered(Query query, Pageable pageable) {

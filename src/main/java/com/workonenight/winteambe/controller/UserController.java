@@ -63,8 +63,8 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping(value = "/register")
-    public UserDTO registerUser(HttpServletRequest request) {
-        return userService.registerUser(request);
+    public UserDTO registerUser(HttpServletRequest request, @RequestParam("role") String role) {
+        return userService.registerUser(request, role);
     }
 
     /**
