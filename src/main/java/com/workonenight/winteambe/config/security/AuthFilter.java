@@ -1,7 +1,7 @@
 package com.workonenight.winteambe.config.security;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.workonenight.winteambe.service.FirebaseService;
+import com.workonenight.winteambe.service.other.FirebaseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -22,7 +22,6 @@ public class AuthFilter extends OncePerRequestFilter {
             String idToken = request.getHeader("w1ntoken");
             //token firebase
             if(idToken != null){
-
                 FirebaseAuth.getInstance().verifyIdToken(idToken);
                 filterChain.doFilter(request, response);
             }

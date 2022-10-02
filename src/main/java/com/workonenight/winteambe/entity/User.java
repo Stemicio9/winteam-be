@@ -6,13 +6,14 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
 @NoArgsConstructor
 @Document(collection = "users")
-public class User {
+public class User implements Serializable {
 
     @Id
     private String id;
@@ -42,12 +43,12 @@ public class User {
     private boolean verified;
     private List<String> influencedUserList;
 
-    public User(String id, String email){
+    public User(String id, String email) {
         this.id = id;
         this.email = email;
     }
 
-    public UserDTO toDTO(){
+    public UserDTO toDTO() {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(this.id);
         userDTO.setFirstName(this.firstName);
@@ -76,7 +77,7 @@ public class User {
         return userDTO;
     }
 
-    public User toUpdateEntity(UserDTO userDTO){
+    public User toUpdateEntity(UserDTO userDTO) {
         this.firstName = userDTO.getFirstName();
         this.lastName = userDTO.getLastName();
         this.email = userDTO.getEmail();

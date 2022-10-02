@@ -5,9 +5,11 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
+
 @Data
 @Document(collection = "subscriptions")
-public class Subscription {
+public class Subscription implements Serializable {
 
     @Id
     private String id;
