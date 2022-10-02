@@ -2,12 +2,14 @@ package com.workonenight.winteambe.entity;
 
 import com.workonenight.winteambe.dto.SubscriptionDTO;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 
 @Data
+@NoArgsConstructor
 @Document(collection = "subscriptions")
 public class Subscription implements Serializable {
 

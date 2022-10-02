@@ -1,6 +1,5 @@
 package com.workonenight.winteambe.common;
 
-import com.workonenight.winteambe.common.FilterCondition;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 

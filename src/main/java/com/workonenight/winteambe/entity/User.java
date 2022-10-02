@@ -41,6 +41,9 @@ public class User implements Serializable {
     //company type id to join in the company type collection
     private List<String> companyTypeId;
     private boolean verified;
+
+    //TODO enable this when the subscription is ready
+    // private boolean enabledAnnunci;
     private List<String> influencedUserList;
 
     public User(String id, String email) {
@@ -73,6 +76,7 @@ public class User implements Serializable {
         userDTO.setCompanyTypeId(this.companyTypeId);
         userDTO.setVerified(this.verified);
         userDTO.setInfluencedUserList(this.influencedUserList);
+        //TODO: add enabledAnnunci
         //userDTO.setEnabledAnnunci(Utils.calculateEnabledAnnunci(this.contatoreAnnunci, this.subscriptionId));
         return userDTO;
     }
@@ -100,6 +104,8 @@ public class User implements Serializable {
         this.companyTypeId = userDTO.getCompanyTypeId();
         this.verified = userDTO.isVerified();
         this.influencedUserList = userDTO.getInfluencedUserList();
+        //TODO: add enabledAnnunci
+        //this.enabledAnnunci = Utils.calculateEnabledAnnunci(userDTO.getContatoreAnnunci(), userDTO.getSubscriptionId());
         return this;
     }
 

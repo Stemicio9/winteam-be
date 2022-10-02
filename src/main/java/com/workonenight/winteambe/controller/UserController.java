@@ -1,9 +1,9 @@
 package com.workonenight.winteambe.controller;
 
 import com.workonenight.winteambe.common.FilterCondition;
+import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
 import com.workonenight.winteambe.dto.UserDTO;
-import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.service.UserService;
 import com.workonenight.winteambe.service.other.FilterBuilderService;
 import org.springframework.data.domain.Page;
