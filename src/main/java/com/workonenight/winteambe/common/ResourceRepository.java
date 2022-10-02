@@ -15,4 +15,6 @@ public interface ResourceRepository<T, I extends Serializable> extends MongoRepo
     Page<T> findAll(Query query, Pageable pageable);
 
     List<T> findAll(Query query);
+
+
 }
