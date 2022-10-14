@@ -3,15 +3,18 @@ package com.workonenight.winteambe.service.other;
 import com.workonenight.winteambe.common.FilterCondition;
 import com.workonenight.winteambe.common.FilterOperationEnum;
 import com.workonenight.winteambe.exception.BadRequestException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 @Service
 public class FilterBuilderService {
 
@@ -39,7 +42,23 @@ public class FilterBuilderService {
                     values.forEach(x -> {
                         List<String> filter = split(x, FILTER_CONDITION_DELIMITER);
                         if (FilterOperationEnum.fromValue(filter.get(1)) != null) {
-                            filters.add(new FilterCondition(filter.get(0), FilterOperationEnum.fromValue(filter.get(1)), filter.get(2)));
+                            String valueType = filter.get(3);
+
+                            switch (valueType) {
+                                case "string":
+                                    filters.add(new FilterCondition(filter.get(0), FilterOperationEnum.fromValue(filter.get(1)), filter.get(2)));
+                                    break;
+                                case "number":
+                                    filters.add(new FilterCondition(filter.get(0), FilterOperationEnum.fromValue(filter.get(1)), Double.parseDouble(filter.get(2))));
+                                    break;
+                                case "date":
+                                    filters.add(new FilterCondition(filter.get(0), FilterOperationEnum.fromValue(filter.get(1)), LocalDateTime.parse(filter.get(2))));
+                                    break;
+                                default:
+                                    log.info("Type not found");
+                                    break;
+                            }
+
                         }
                     });
                 }

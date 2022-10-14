@@ -1,7 +1,10 @@
 package com.workonenight.winteambe.service;
 
 import com.google.firebase.auth.FirebaseToken;
+import com.workonenight.winteambe.dto.CanIDTO;
+import com.workonenight.winteambe.dto.SubscriptionDTO;
 import com.workonenight.winteambe.dto.UserDTO;
+import com.workonenight.winteambe.entity.Subscription;
 import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.UserRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
@@ -23,12 +26,16 @@ public class UserService {
     private final UserRepository userRepository;
     private final FirebaseService firebaseService;
 
-    public UserService(UserRepository userRepository, FirebaseService firebaseService) {
+    private final SubscriptionService subscriptionService;
+
+    public UserService(UserRepository userRepository, FirebaseService firebaseService, SubscriptionService subscriptionService) {
         this.userRepository = userRepository;
         this.firebaseService = firebaseService;
+        this.subscriptionService = subscriptionService;
     }
 
     public List<UserDTO> getAllUser() {
+        log.info("Get all user");
         return userRepository.findAll().stream().map(User::toDTO).collect(Collectors.toList());
     }
 
@@ -55,9 +62,9 @@ public class UserService {
         FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
         if (firebaseToken != null) {
             log.info("Requested info for user: {}", firebaseToken.getUid());
-            User user = getUserByEmail(firebaseToken.getEmail());
-            if (user != null) {
-                return user.toDTO();
+            UserDTO userDTO = getUserById(firebaseToken.getUid());
+            if (userDTO != null) {
+                return userDTO;
             }
             log.error("User not found for email: {}", firebaseToken.getEmail());
         }
@@ -68,7 +75,7 @@ public class UserService {
     public UserDTO registerUser(HttpServletRequest request, String role) {
         User user = firebaseService.getMinimalUser(request);
         if (user != null) {
-            if(existUserByEmail(user.getEmail())) {
+            if (existUserByEmail(user.getEmail())) {
                 log.error("User already exist: {}", user.getEmail());
                 return null;
             }
@@ -96,4 +103,34 @@ public class UserService {
         return userRepository.findUserByEmail(email).orElse(null);
     }
 
+    public CanIDTO canI(HttpServletRequest request, String what) {
+        FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
+        CanIDTO canIDTO = new CanIDTO();
+        if (firebaseToken != null) {
+            log.info("Requested info for user: {}", firebaseToken.getUid());
+            UserDTO userDTO = getUserById(firebaseToken.getUid());
+            String subscriptionId = userDTO.getSubscriptionId();
+            if (subscriptionId == null) {
+                log.info("User {} has no subscription", userDTO.getEmail());
+                canIDTO.setResponse(false);
+            } else {
+                SubscriptionDTO subscription = subscriptionService.getSubscriptionById(subscriptionId);
+                switch (what) {
+                    case "search":
+                        log.info("Can user {} search? {}", userDTO.getEmail(), subscription.isSearchEnabled());
+                        canIDTO.setResponse(subscription.isSearchEnabled());
+                    case "createAdvertisement":
+                        boolean res = subscription.isCreateAdvertisementEnabled() && subscription.getNumAnnunci() > userDTO.getContatoreAnnunci();
+                        log.info("Can user {} create advertisement? {}", userDTO.getEmail(), res);
+                        canIDTO.setResponse(res);
+                    default:
+                        log.error("Unknown what: {}", what);
+                        canIDTO.setResponse(false);
+                }
+            }
+            return canIDTO;
+        }
+        log.error("Token not found in request");
+        return null;
+    }
 }

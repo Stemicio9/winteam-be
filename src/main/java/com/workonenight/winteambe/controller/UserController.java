@@ -3,6 +3,7 @@ package com.workonenight.winteambe.controller;
 import com.workonenight.winteambe.common.FilterCondition;
 import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
+import com.workonenight.winteambe.dto.CanIDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.service.UserService;
 import com.workonenight.winteambe.service.other.FilterBuilderService;
@@ -94,7 +95,7 @@ public class UserController {
      * @param filterOr  string filter or conditions
      * @param filterAnd string filter and conditions
      * @param orders    string orders
-     * @return PageResponse<Employee>
+     * @return PageResponse<UserDTO>
      */
     @GetMapping(value = "/page")
     public ResponseEntity<PageResponse<UserDTO>> getSearchCriteriaPage(
@@ -123,7 +124,7 @@ public class UserController {
     /**
      * @param filterOr  string filter or conditions
      * @param filterAnd string filter and conditions
-     * @return list of Employee
+     * @return list of UserDTO
      */
     @GetMapping("/list/filter")
     public ResponseEntity<List<UserDTO>> getAllSearchCriteria(
@@ -139,5 +140,11 @@ public class UserController {
         List<UserDTO> employees = userService.getAllFiltered(query);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
+    }
+
+
+    @GetMapping("/cani")
+    public ResponseEntity<CanIDTO> canI(HttpServletRequest request, @RequestParam("what") String what) {
+        return new ResponseEntity<>(userService.canI(request, what), HttpStatus.OK);
     }
 }

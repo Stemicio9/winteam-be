@@ -7,11 +7,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class AdvertisementDTO {
+public class AdvertisementRequest {
+
     private String id;
     private String title;
     private String description;
-    private String date;
+    private LocalDateTime date;
     private String hourSlot;
     private String skill;
     private Double payment;
@@ -20,13 +21,12 @@ public class AdvertisementDTO {
     private String matchedUserId;
     private String advertisementStatus;
 
-    //convert dto to entity
     public Advertisement toEntity() {
         Advertisement advertisement = new Advertisement();
         advertisement.setId(this.id);
         advertisement.setTitle(this.title);
         advertisement.setDescription(this.description);
-        advertisement.setDate(LocalDateTime.parse(this.date));
+        advertisement.setDate(this.date);
         advertisement.setHourSlot(this.hourSlot);
         advertisement.setSkill(this.skill);
         advertisement.setPayment(this.payment);
@@ -35,4 +35,7 @@ public class AdvertisementDTO {
         advertisement.setMatchedUserId(this.matchedUserId);
         return advertisement;
     }
+
+
+
 }

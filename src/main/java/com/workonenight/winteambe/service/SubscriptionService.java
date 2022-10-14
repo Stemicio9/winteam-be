@@ -22,7 +22,8 @@ public class SubscriptionService {
     }
 
     public SubscriptionDTO getSubscriptionById(String id) {
-        return subscriptionRepository.findById(id).orElseThrow().toDTO();
+        Subscription subscription = subscriptionRepository.findById(id).orElse(null);
+        return subscription != null ? subscription.toDTO() : null;
     }
 
     public SubscriptionDTO createSubscription(SubscriptionDTO subscriptionDTO) {

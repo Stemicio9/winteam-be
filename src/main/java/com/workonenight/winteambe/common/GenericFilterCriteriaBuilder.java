@@ -51,6 +51,8 @@ public class GenericFilterCriteriaBuilder {
 
         List<Criteria> criteriaAndClause = new ArrayList<>();
         List<Criteria> criteriaOrClause = new ArrayList<>();
+        Criteria andCriteria = new Criteria();
+        Criteria orCriteria = new Criteria();
         Criteria criteria = new Criteria();
 
         // build criteria
@@ -59,7 +61,11 @@ public class GenericFilterCriteriaBuilder {
 
 
         if (!criteriaAndClause.isEmpty() && !criteriaOrClause.isEmpty()) {
-            return new Query(criteria.andOperator(criteriaAndClause.toArray(new Criteria[0])).orOperator(criteriaOrClause.toArray(new Criteria[0])));
+            andCriteria.andOperator(criteriaAndClause.toArray(new Criteria[0]));
+            orCriteria.orOperator(criteriaOrClause.toArray(new Criteria[0]));
+            return new Query(criteria.andOperator(andCriteria, orCriteria));
+
+            //return new Query(criteria.andOperator(criteriaAndClause.toArray(new Criteria[0])).orOperator(criteriaOrClause.toArray(new Criteria[0])));
         } else if (!criteriaAndClause.isEmpty()) {
             return new Query(criteria.andOperator(criteriaAndClause.toArray(new Criteria[0])));
         } else if (!criteriaOrClause.isEmpty()) {

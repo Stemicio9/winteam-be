@@ -20,6 +20,7 @@ public class Subscription implements Serializable {
     private int numberOfDays;
     private double price;
     private boolean searchEnabled;
+    private boolean createAdvertisementEnabled;
     private String imageLink;
     public SubscriptionDTO toDTO(){
         SubscriptionDTO subscriptionDTO = new SubscriptionDTO();
@@ -29,6 +30,7 @@ public class Subscription implements Serializable {
         subscriptionDTO.setNumberOfDays(this.numberOfDays);
         subscriptionDTO.setPrice(this.price);
         subscriptionDTO.setSearchEnabled(this.searchEnabled);
+        subscriptionDTO.setSearchEnabled(this.createAdvertisementEnabled);
         subscriptionDTO.setImageLink(this.imageLink);
         return subscriptionDTO;
     }
@@ -38,7 +40,6 @@ public class Subscription implements Serializable {
         this.numAnnunci = subscriptionDTO.getNumAnnunci();
         this.numberOfDays = subscriptionDTO.getNumberOfDays();
         this.price = subscriptionDTO.getPrice();
-        this.searchEnabled = subscriptionDTO.isSearchEnabled();
         this.imageLink = subscriptionDTO.getImageLink();
         return this;
     }

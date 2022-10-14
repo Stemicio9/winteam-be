@@ -15,6 +15,7 @@ import java.util.List;
 @Document(collection = "users")
 public class User implements Serializable {
 
+    private static final String anonymous = "******";
     @Id
     private String id;
     private String firstName;
@@ -42,8 +43,6 @@ public class User implements Serializable {
     private List<String> companyTypeId;
     private boolean verified;
 
-    //TODO enable this when the subscription is ready
-    // private boolean enabledAnnunci;
     private List<String> influencedUserList;
 
     public User(String id, String email) {
@@ -51,7 +50,35 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public UserDTO toDTO() {
+    public UserDTO toDTOAnonymous() {
+        UserDTO userDTO = new UserDTO();
+        userDTO.setId(anonymous);
+        userDTO.setFirstName(this.firstName);
+        userDTO.setLastName(anonymous);
+        userDTO.setEmail(anonymous + this.email.split("@")[1]);
+        userDTO.setRoleId(this.roleId);
+        userDTO.setDescription(anonymous);
+        userDTO.setBrief(anonymous);
+        userDTO.setSkillList(this.skillList);
+        userDTO.setAvailabilityDays(this.availabilityDays);
+        userDTO.setAvailabilityHourSlots(this.availabilityHourSlots);
+        userDTO.setAvailabilityCities(this.availabilityCities);
+        userDTO.setAddress(anonymous);
+        userDTO.setCity(anonymous);
+        userDTO.setProvince(anonymous);
+        userDTO.setNation(anonymous);
+        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + anonymous);
+        userDTO.setImageLink(this.imageLink);
+        userDTO.setContatoreAnnunci(this.contatoreAnnunci);
+        userDTO.setSubscriptionId(this.subscriptionId);
+        userDTO.setLastSubscriptionDate(this.lastSubscriptionDate);
+        userDTO.setCompanyTypeId(this.companyTypeId);
+        userDTO.setVerified(this.verified);
+        userDTO.setInfluencedUserList(this.influencedUserList);
+        return userDTO;
+    }
+
+    public UserDTO toDTO(){
         UserDTO userDTO = new UserDTO();
         userDTO.setId(this.id);
         userDTO.setFirstName(this.firstName);
@@ -76,8 +103,6 @@ public class User implements Serializable {
         userDTO.setCompanyTypeId(this.companyTypeId);
         userDTO.setVerified(this.verified);
         userDTO.setInfluencedUserList(this.influencedUserList);
-        //TODO: add enabledAnnunci
-        //userDTO.setEnabledAnnunci(Utils.calculateEnabledAnnunci(this.contatoreAnnunci, this.subscriptionId));
         return userDTO;
     }
 
@@ -104,8 +129,6 @@ public class User implements Serializable {
         this.companyTypeId = userDTO.getCompanyTypeId();
         this.verified = userDTO.isVerified();
         this.influencedUserList = userDTO.getInfluencedUserList();
-        //TODO: add enabledAnnunci
-        //this.enabledAnnunci = Utils.calculateEnabledAnnunci(userDTO.getContatoreAnnunci(), userDTO.getSubscriptionId());
         return this;
     }
 
