@@ -59,7 +59,7 @@ public class User implements Serializable {
         userDTO.setRoleId(this.roleId);
         userDTO.setDescription(anonymous);
         userDTO.setBrief(anonymous);
-        userDTO.setSkillList(this.skillList);
+        userDTO.setSkillIds(this.skillList);
         userDTO.setAvailabilityDays(this.availabilityDays);
         userDTO.setAvailabilityHourSlots(this.availabilityHourSlots);
         userDTO.setAvailabilityCities(this.availabilityCities);
@@ -87,7 +87,7 @@ public class User implements Serializable {
         userDTO.setRoleId(this.roleId);
         userDTO.setDescription(this.description);
         userDTO.setBrief(this.brief);
-        userDTO.setSkillList(this.skillList);
+        userDTO.setSkillIds(this.skillList);
         userDTO.setAvailabilityDays(this.availabilityDays);
         userDTO.setAvailabilityHourSlots(this.availabilityHourSlots);
         userDTO.setAvailabilityCities(this.availabilityCities);
@@ -113,7 +113,7 @@ public class User implements Serializable {
         this.roleId = userDTO.getRoleId();
         this.description = userDTO.getDescription();
         this.brief = userDTO.getBrief();
-        this.skillList = userDTO.getSkillList();
+        this.skillList = userDTO.getSkillIds();
         this.availabilityDays = userDTO.getAvailabilityDays();
         this.availabilityHourSlots = userDTO.getAvailabilityHourSlots();
         this.availabilityCities = userDTO.getAvailabilityCities();

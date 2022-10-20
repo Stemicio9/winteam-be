@@ -2,8 +2,10 @@ package com.workonenight.winteambe.dto;
 
 import com.workonenight.winteambe.entity.Skill;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class SkillDTO {
     private String id;
     private String name;

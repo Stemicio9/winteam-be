@@ -18,7 +18,9 @@ public class UserDTO {
     private String roleId;
     private String description;
     private String brief;
-    private List<String> skillList;
+    private List<String> skillIds;
+
+    private List<SkillDTO> skillList;
     private List<String> availabilityDays;
     private List<String> availabilityHourSlots;
     private List<String> availabilityCities;
@@ -27,7 +29,6 @@ public class UserDTO {
     private String province;
     private String nation;
     private String phoneNumber;
-
     private String imageLink;
     private int contatoreAnnunci;
     //subscription id to join in the subscription collection
@@ -54,7 +55,7 @@ public class UserDTO {
         user.setRoleId(this.roleId);
         user.setDescription(this.description);
         user.setBrief(this.brief);
-        user.setSkillList(this.skillList);
+        user.setSkillList(this.skillIds);
         user.setAvailabilityDays(this.availabilityDays);
         user.setAvailabilityHourSlots(this.availabilityHourSlots);
         user.setAvailabilityCities(this.availabilityCities);

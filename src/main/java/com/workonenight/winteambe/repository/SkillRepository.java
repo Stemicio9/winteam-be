@@ -1,7 +1,12 @@
 package com.workonenight.winteambe.repository;
 
+import com.workonenight.winteambe.common.ResourceRepository;
 import com.workonenight.winteambe.entity.Skill;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
 
-public interface SkillRepository extends MongoRepository<Skill, String> {
+import java.util.Optional;
+
+@Repository
+public interface SkillRepository extends ResourceRepository<Skill, String> {
+
 }
