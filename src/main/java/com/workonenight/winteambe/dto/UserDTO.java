@@ -15,6 +15,7 @@ public class UserDTO {
     private String id;
     private String firstName;
     private String lastName;
+    private String companyName;
     private String email;
     //role id to join in the role collection
     private String roleId;
@@ -43,16 +44,12 @@ public class UserDTO {
 
     private boolean enabledAnnunci;
 
-    public UserDTO(String id) {
-        this.id = id;
-    }
-
-
     public User toEntity(){
         User user = new User();
         user.setId(this.id);
         user.setFirstName(this.firstName);
         user.setLastName(this.lastName);
+        user.setCompanyName(this.companyName);
         user.setEmail(this.email);
         user.setRoleId(this.roleId);
         user.setDescription(this.description);

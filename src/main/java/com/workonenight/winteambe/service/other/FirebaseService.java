@@ -44,7 +44,8 @@ public class FirebaseService {
             return firebaseToken.getClaims();
         }
         log.warn("No token found in request");
-        return null;
+        //return empty map
+        return Map.of();
     }
 
     public FirebaseToken getFirebaseToken(HttpServletRequest request) {

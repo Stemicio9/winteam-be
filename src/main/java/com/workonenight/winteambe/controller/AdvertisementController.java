@@ -122,9 +122,9 @@ public class AdvertisementController {
         List<FilterCondition> orConditions = filterBuilderService.createFilterCondition(filterOr);
 
         Query query = filterCriteriaBuilder.addCondition(andConditions, orConditions);
-        List<AdvertisementDTO> employees = advertisementService.getAllFiltered(query);
+        List<AdvertisementDTO> advertisementDTOList = advertisementService.getAllFiltered(query);
 
-        return new ResponseEntity<>(employees, HttpStatus.OK);
+        return new ResponseEntity<>(advertisementDTOList, HttpStatus.OK);
     }
 
 }

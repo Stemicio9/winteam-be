@@ -4,6 +4,7 @@ import com.workonenight.winteambe.dto.SkillDTO;
 import com.workonenight.winteambe.entity.Skill;
 import com.workonenight.winteambe.repository.SkillRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,11 +29,7 @@ public class SkillService {
     public SkillDTO getSkillById(String id) {
         log.info("Searching skill with id: {}", id);
         Optional<Skill> opt = skillRepository.findById(id);
-        if(opt.isPresent()){
-            log.info("Skill found");
-            return opt.get().toDTO();
-        }
-        return null;
+        return opt.map(Skill::toDTO).orElse(null);
     }
     public SkillDTO createSkill(SkillDTO skillDTO) {
         log.info("Creating skill: {}", skillDTO.getName());
@@ -48,5 +45,10 @@ public class SkillService {
             return skillRepository.save(skill).toDTO();
         }
         return null;
+    }
+
+    public List<SkillDTO> getAllFiltered(Query query) {
+        log.info("Get All Skills Filtered");
+        return skillRepository.findAll(query).stream().map(Skill::toDTO).collect(Collectors.toList());
     }
 }

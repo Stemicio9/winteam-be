@@ -1,6 +1,7 @@
 package com.workonenight.winteambe.entity;
 
 import com.workonenight.winteambe.dto.UserDTO;
+import com.workonenight.winteambe.utils.Utils;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -15,11 +16,11 @@ import java.util.List;
 @Document(collection = "users")
 public class User implements Serializable {
 
-    private static final String anonymous = "******";
     @Id
     private String id;
     private String firstName;
     private String lastName;
+    private String companyName;
     private String email;
     //role id to join in the role collection
     private String roleId;
@@ -52,22 +53,23 @@ public class User implements Serializable {
 
     public UserDTO toDTOAnonymous() {
         UserDTO userDTO = new UserDTO();
-        userDTO.setId(anonymous);
+        userDTO.setId(Utils.ANONYMOUS);
         userDTO.setFirstName(this.firstName);
-        userDTO.setLastName(anonymous);
-        userDTO.setEmail(anonymous + this.email.split("@")[1]);
+        userDTO.setLastName(Utils.ANONYMOUS);
+        userDTO.setCompanyName(Utils.ANONYMOUS);
+        userDTO.setEmail(Utils.ANONYMOUS + this.email.split("@")[1]);
         userDTO.setRoleId(this.roleId);
-        userDTO.setDescription(anonymous);
-        userDTO.setBrief(anonymous);
+        userDTO.setDescription(Utils.ANONYMOUS);
+        userDTO.setBrief(Utils.ANONYMOUS);
         userDTO.setSkillIds(this.skillList);
         userDTO.setAvailabilityDays(this.availabilityDays);
         userDTO.setAvailabilityHourSlots(this.availabilityHourSlots);
         userDTO.setAvailabilityCities(this.availabilityCities);
-        userDTO.setAddress(anonymous);
-        userDTO.setCity(anonymous);
-        userDTO.setProvince(anonymous);
-        userDTO.setNation(anonymous);
-        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + anonymous);
+        userDTO.setAddress(Utils.ANONYMOUS);
+        userDTO.setCity(Utils.ANONYMOUS);
+        userDTO.setProvince(Utils.ANONYMOUS);
+        userDTO.setNation(Utils.ANONYMOUS);
+        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + Utils.ANONYMOUS);
         userDTO.setImageLink(this.imageLink);
         userDTO.setContatoreAnnunci(this.contatoreAnnunci);
         userDTO.setSubscriptionId(this.subscriptionId);
@@ -83,6 +85,7 @@ public class User implements Serializable {
         userDTO.setId(this.id);
         userDTO.setFirstName(this.firstName);
         userDTO.setLastName(this.lastName);
+        userDTO.setCompanyName(this.companyName);
         userDTO.setEmail(this.email);
         userDTO.setRoleId(this.roleId);
         userDTO.setDescription(this.description);
@@ -109,6 +112,7 @@ public class User implements Serializable {
     public User toUpdateEntity(UserDTO userDTO) {
         this.firstName = userDTO.getFirstName();
         this.lastName = userDTO.getLastName();
+        this.companyName = userDTO.getCompanyName();
         this.email = userDTO.getEmail();
         this.roleId = userDTO.getRoleId();
         this.description = userDTO.getDescription();

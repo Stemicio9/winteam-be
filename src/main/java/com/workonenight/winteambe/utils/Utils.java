@@ -7,6 +7,7 @@ import java.time.temporal.ChronoUnit;
 public class Utils {
 
     public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM");
+    public static final String ANONYMOUS = "******";
 
     private Utils() {
     }

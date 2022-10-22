@@ -64,8 +64,6 @@ public class GenericFilterCriteriaBuilder {
             andCriteria.andOperator(criteriaAndClause.toArray(new Criteria[0]));
             orCriteria.orOperator(criteriaOrClause.toArray(new Criteria[0]));
             return new Query(criteria.andOperator(andCriteria, orCriteria));
-
-            //return new Query(criteria.andOperator(criteriaAndClause.toArray(new Criteria[0])).orOperator(criteriaOrClause.toArray(new Criteria[0])));
         } else if (!criteriaAndClause.isEmpty()) {
             return new Query(criteria.andOperator(criteriaAndClause.toArray(new Criteria[0])));
         } else if (!criteriaOrClause.isEmpty()) {
@@ -95,7 +93,6 @@ public class GenericFilterCriteriaBuilder {
     }
 
     private static String buildLikeString(String value) {
-        //TODO creare metodo di escaping corretto e fare il test
         value = value.replace(".", "\\.");
         return ".*" + value + ".*";
     }

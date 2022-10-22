@@ -145,13 +145,16 @@ public class UserService {
                     case "search":
                         log.info("Can user {} search? {}", userDTO.getEmail(), subscription.isSearchEnabled());
                         canIDTO.setResponse(subscription.isSearchEnabled());
+                        break;
                     case "createAdvertisement":
                         boolean res = subscription.isCreateAdvertisementEnabled() && subscription.getNumAnnunci() > userDTO.getContatoreAnnunci();
                         log.info("Can user {} create advertisement? {}", userDTO.getEmail(), res);
                         canIDTO.setResponse(res);
+                        break;
                     default:
                         log.error("Unknown what: {}", what);
                         canIDTO.setResponse(false);
+                        break;
                 }
             }
             return canIDTO;

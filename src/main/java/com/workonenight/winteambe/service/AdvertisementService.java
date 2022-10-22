@@ -79,6 +79,7 @@ public class AdvertisementService {
     }
 
     public List<AdvertisementDTO> getAllFiltered(Query query) {
+        log.info("Get all advertisements filtered");
         return advertisementRepository.findAll(query).stream().map(Advertisement::toDTO).collect(Collectors.toList());
     }
 }

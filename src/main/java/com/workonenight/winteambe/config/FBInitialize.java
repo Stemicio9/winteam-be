@@ -3,11 +3,13 @@ package com.workonenight.winteambe.config;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
 
+@Slf4j
 @Service
 public class FBInitialize {
 
@@ -17,13 +19,13 @@ public class FBInitialize {
             FileInputStream serviceAccount =
                     new FileInputStream("src/main/resources/workonenight-team-firebase.json");
 
-            FirebaseOptions options = new FirebaseOptions.Builder()
+            FirebaseOptions options = FirebaseOptions.builder()
                     .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                     .build();
 
             FirebaseApp.initializeApp(options);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Error initializing Firebase", e);
         }
 
     }
