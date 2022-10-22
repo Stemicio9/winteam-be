@@ -43,9 +43,13 @@ public class UserService {
     }
 
     public UserDTO getUserById(String id) {
+        log.info("Searching user for id: {}", id);
         Optional<User> opt = userRepository.findById(id);
-        if(opt.isPresent()){
+        if (opt.isPresent()) {
             UserDTO userDTO = opt.get().toDTO();
+            if (userDTO.getSkillIds() == null) {
+                userDTO.setSkillIds(new ArrayList<>());
+            }
             userDTO.setSkillList(generateSkillDTOList(userDTO.getSkillIds()));
             return userDTO;
         }
@@ -53,12 +57,13 @@ public class UserService {
     }
 
     public UserDTO createUser(UserDTO userDTO) {
+        log.info("Creating user: " + userDTO.getEmail());
         User user = userDTO.toEntity();
-        log.info("Creating user: " + user.getEmail());
         return userRepository.save(user).toDTO();
     }
 
     public UserDTO updateUser(UserDTO userDTO) {
+        log.info("Updating user: " + userDTO.getEmail());
         User user = userRepository.findById(userDTO.getId()).orElse(null);
         if (user != null) {
             user = user.toUpdateEntity(userDTO);
@@ -83,11 +88,10 @@ public class UserService {
     }
 
     private List<SkillDTO> generateSkillDTOList(List<String> skillIds) {
-        log.info("GET ALL SKILL: {}",skillService.getAllSkill());
         List<SkillDTO> res = new ArrayList<>();
-        for(String id: skillIds){
+        for (String id : skillIds) {
             SkillDTO skillDTO = skillService.getSkillById(id);
-            if(skillDTO != null){
+            if (skillDTO != null) {
                 res.add(skillDTO);
             }
         }

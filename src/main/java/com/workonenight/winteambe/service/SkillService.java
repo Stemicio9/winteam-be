@@ -1,9 +1,7 @@
 package com.workonenight.winteambe.service;
 
 import com.workonenight.winteambe.dto.SkillDTO;
-import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.entity.Skill;
-import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.SkillRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -37,11 +35,13 @@ public class SkillService {
         return null;
     }
     public SkillDTO createSkill(SkillDTO skillDTO) {
+        log.info("Creating skill: {}", skillDTO.getName());
         Skill skill = skillDTO.toEntity();
         return skillRepository.save(skill).toDTO();
     }
 
     public SkillDTO updateSkill(SkillDTO skillDTO) {
+        log.info("Updating skill: {}", skillDTO.getName());
         Skill skill = skillRepository.findById(skillDTO.getId()).orElse(null);
         if (skill != null) {
             skill = skill.toUpdateEntity(skillDTO);
