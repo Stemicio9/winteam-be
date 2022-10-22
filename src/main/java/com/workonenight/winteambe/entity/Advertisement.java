@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -37,7 +38,7 @@ public class Advertisement implements Serializable {
         advertisementDTO.setSkill(this.skill);
         advertisementDTO.setPayment(this.payment);
         advertisementDTO.setPublisherUserId(this.publisherUserId);
-        advertisementDTO.setCandidateUserList(this.candidateUserList);
+        advertisementDTO.setCandidateUserList(this.candidateUserList.size() == 0 ? new ArrayList<>() : this.candidateUserList);
         advertisementDTO.setMatchedUserId(this.matchedUserId);
         advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatus(this.date, this.matchedUserId));
         return advertisementDTO;
@@ -51,7 +52,7 @@ public class Advertisement implements Serializable {
         this.skill = advertisementDTO.getSkill();
         this.payment = advertisementDTO.getPayment();
         this.publisherUserId = advertisementDTO.getPublisherUserId();
-        this.candidateUserList = advertisementDTO.getCandidateUserList();
+        this.candidateUserList = advertisementDTO.getCandidateUserList().size() == 0 ? new ArrayList<>() : advertisementDTO.getCandidateUserList();
         this.matchedUserId = advertisementDTO.getMatchedUserId();
         return this;
     }

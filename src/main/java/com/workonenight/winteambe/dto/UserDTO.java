@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -54,10 +55,10 @@ public class UserDTO {
         user.setRoleId(this.roleId);
         user.setDescription(this.description);
         user.setBrief(this.brief);
-        user.setSkillList(this.skillIds);
-        user.setAvailabilityDays(this.availabilityDays);
-        user.setAvailabilityHourSlots(this.availabilityHourSlots);
-        user.setAvailabilityCities(this.availabilityCities);
+        user.setSkillList(this.skillIds.size() > 0 ? this.skillIds : new ArrayList<>());
+        user.setAvailabilityDays(this.availabilityDays.size() > 0 ? this.availabilityDays : new ArrayList<>());
+        user.setAvailabilityHourSlots(this.availabilityHourSlots.size() > 0 ? this.availabilityHourSlots : new ArrayList<>());
+        user.setAvailabilityCities(this.availabilityCities.size() > 0 ? this.availabilityCities : new ArrayList<>());
         user.setAddress(this.address);
         user.setCity(this.city);
         user.setProvince(this.province);

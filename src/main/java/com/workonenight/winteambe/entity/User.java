@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -54,59 +55,33 @@ public class User implements Serializable {
     public UserDTO toDTOAnonymous() {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(Utils.ANONYMOUS);
-        userDTO.setFirstName(this.firstName);
         userDTO.setLastName(Utils.ANONYMOUS);
         userDTO.setCompanyName(Utils.ANONYMOUS);
         userDTO.setEmail(Utils.ANONYMOUS + this.email.split("@")[1]);
-        userDTO.setRoleId(this.roleId);
+        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + Utils.ANONYMOUS);
         userDTO.setDescription(Utils.ANONYMOUS);
         userDTO.setBrief(Utils.ANONYMOUS);
-        userDTO.setSkillIds(this.skillList);
-        userDTO.setAvailabilityDays(this.availabilityDays);
-        userDTO.setAvailabilityHourSlots(this.availabilityHourSlots);
-        userDTO.setAvailabilityCities(this.availabilityCities);
         userDTO.setAddress(Utils.ANONYMOUS);
         userDTO.setCity(Utils.ANONYMOUS);
         userDTO.setProvince(Utils.ANONYMOUS);
         userDTO.setNation(Utils.ANONYMOUS);
-        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + Utils.ANONYMOUS);
-        userDTO.setImageLink(this.imageLink);
-        userDTO.setContatoreAnnunci(this.contatoreAnnunci);
-        userDTO.setSubscriptionId(this.subscriptionId);
-        userDTO.setLastSubscriptionDate(this.lastSubscriptionDate);
-        userDTO.setCompanyTypeId(this.companyTypeId);
-        userDTO.setVerified(this.verified);
-        userDTO.setInfluencedUserList(this.influencedUserList);
-        return userDTO;
+        return finalizeDTOProcess(userDTO);
     }
 
     public UserDTO toDTO(){
         UserDTO userDTO = new UserDTO();
         userDTO.setId(this.id);
-        userDTO.setFirstName(this.firstName);
         userDTO.setLastName(this.lastName);
         userDTO.setCompanyName(this.companyName);
         userDTO.setEmail(this.email);
-        userDTO.setRoleId(this.roleId);
         userDTO.setDescription(this.description);
         userDTO.setBrief(this.brief);
-        userDTO.setSkillIds(this.skillList);
-        userDTO.setAvailabilityDays(this.availabilityDays);
-        userDTO.setAvailabilityHourSlots(this.availabilityHourSlots);
-        userDTO.setAvailabilityCities(this.availabilityCities);
         userDTO.setAddress(this.address);
         userDTO.setCity(this.city);
         userDTO.setProvince(this.province);
         userDTO.setNation(this.nation);
         userDTO.setPhoneNumber(this.phoneNumber);
-        userDTO.setImageLink(this.imageLink);
-        userDTO.setContatoreAnnunci(this.contatoreAnnunci);
-        userDTO.setSubscriptionId(this.subscriptionId);
-        userDTO.setLastSubscriptionDate(this.lastSubscriptionDate);
-        userDTO.setCompanyTypeId(this.companyTypeId);
-        userDTO.setVerified(this.verified);
-        userDTO.setInfluencedUserList(this.influencedUserList);
-        return userDTO;
+        return finalizeDTOProcess(userDTO);
     }
 
     public User toUpdateEntity(UserDTO userDTO) {
@@ -134,6 +109,23 @@ public class User implements Serializable {
         this.verified = userDTO.isVerified();
         this.influencedUserList = userDTO.getInfluencedUserList();
         return this;
+    }
+
+    private UserDTO finalizeDTOProcess(UserDTO userDTO){
+        userDTO.setFirstName(this.firstName);
+        userDTO.setRoleId(this.roleId);
+        userDTO.setSkillIds(this.skillList);
+        userDTO.setAvailabilityDays(this.availabilityDays.size() > 0 ? this.availabilityDays : new ArrayList<>());
+        userDTO.setAvailabilityHourSlots(this.availabilityHourSlots.size() > 0 ? this.availabilityHourSlots : new ArrayList<>());
+        userDTO.setAvailabilityCities(this.availabilityCities.size() > 0 ? this.availabilityCities : new ArrayList<>());
+        userDTO.setImageLink(this.imageLink);
+        userDTO.setContatoreAnnunci(this.contatoreAnnunci);
+        userDTO.setSubscriptionId(this.subscriptionId);
+        userDTO.setLastSubscriptionDate(this.lastSubscriptionDate);
+        userDTO.setCompanyTypeId(this.companyTypeId);
+        userDTO.setVerified(this.verified);
+        userDTO.setInfluencedUserList(this.influencedUserList);
+        return userDTO;
     }
 
 

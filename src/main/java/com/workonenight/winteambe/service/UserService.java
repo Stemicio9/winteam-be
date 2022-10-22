@@ -49,8 +49,11 @@ public class UserService {
             UserDTO userDTO = opt.get().toDTO();
             if (userDTO.getSkillIds() == null) {
                 userDTO.setSkillIds(new ArrayList<>());
+                userDTO.setSkillList(new ArrayList<>());
+            } else {
+                List<SkillDTO> skillList = generateSkillDTOList(userDTO.getSkillIds());
+                userDTO.setSkillList(skillList);
             }
-            userDTO.setSkillList(generateSkillDTOList(userDTO.getSkillIds()));
             return userDTO;
         }
         return null;
@@ -118,6 +121,7 @@ public class UserService {
     }
 
     public List<UserDTO> getAllFiltered(Query query) {
+        log.info("Get all user filtered");
         return userRepository.findAll(query).stream().map(User::toDTO).collect(Collectors.toList());
     }
 
