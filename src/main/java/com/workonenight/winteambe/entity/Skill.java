@@ -17,22 +17,24 @@ public class Skill implements Serializable {
     private String id;
     private String name;
     private String imageLink;
-
-    private String hexColor;
+    private String hexColorText;
+    private String hexColorBackground;
 
     public SkillDTO toDTO(){
         SkillDTO skillDTO = new SkillDTO();
         skillDTO.setId(this.id);
         skillDTO.setName(this.name);
         skillDTO.setImageLink(this.imageLink);
-        skillDTO.setHexColor(this.hexColor);
+        skillDTO.setHexColorText(this.hexColorText);
+        skillDTO.setHexColorBackground(this.hexColorBackground);
         return skillDTO;
     }
 
     public Skill toUpdateEntity(SkillDTO skillDTO){
         this.name = skillDTO.getName();
         this.imageLink = skillDTO.getImageLink();
-        this.hexColor = skillDTO.getHexColor();
+        this.hexColorText = skillDTO.getHexColorText();
+        this.hexColorBackground = skillDTO.getHexColorBackground();
         return this;
     }
 

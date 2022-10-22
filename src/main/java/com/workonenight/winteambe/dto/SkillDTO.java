@@ -10,14 +10,16 @@ public class SkillDTO {
     private String id;
     private String name;
     private String imageLink;
-    private String hexColor;
+    private String hexColorText;
+    private String hexColorBackground;
 
     public Skill toEntity(){
         Skill skill = new Skill();
         skill.setId(this.id);
         skill.setName(this.name);
         skill.setImageLink(this.imageLink);
-        skill.setHexColor(this.hexColor);
+        skill.setHexColorText(this.hexColorText);
+        skill.setHexColorBackground(this.hexColorBackground);
         return skill;
     }
 }
