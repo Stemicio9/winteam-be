@@ -1,10 +1,7 @@
 package com.workonenight.winteambe.service;
 
 import com.google.firebase.auth.FirebaseToken;
-import com.workonenight.winteambe.dto.CanIDTO;
-import com.workonenight.winteambe.dto.SkillDTO;
-import com.workonenight.winteambe.dto.SubscriptionDTO;
-import com.workonenight.winteambe.dto.UserDTO;
+import com.workonenight.winteambe.dto.*;
 import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.UserRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
@@ -37,25 +34,25 @@ public class UserService {
         this.skillService = skillService;
     }
 
-    public List<UserDTO> getAllUser() {
+    public List<BaseUserDTO> getAllUser() {
         log.info("Get all user");
-        return userRepository.findAll().stream().map(User::toDTO).collect(Collectors.toList());
+        return userRepository.findAll().stream().map(User::toDTO).peek(this::finalizeUserDTO).collect(Collectors.toList());
     }
 
-    public UserDTO getUserById(String id) {
+    public BaseUserDTO getUserById(String id) {
         log.info("Searching user for id: {}", id);
         Optional<User> opt = userRepository.findById(id);
         return opt.map(User::toDTO).map(this::finalizeUserDTO).orElse(null);
     }
 
-    public UserDTO createUser(UserDTO userDTO) {
+    public BaseUserDTO createUser(UserDTO userDTO) {
         log.info("Creating user: " + userDTO.getEmail());
         User user = userDTO.toEntity();
         UserDTO result = userRepository.save(user).toDTO();
         return finalizeUserDTO(result);
     }
 
-    public UserDTO updateUser(UserDTO userDTO) {
+    public BaseUserDTO updateUser(UserDTO userDTO) {
         log.info("Updating user: " + userDTO.getEmail());
         User user = userRepository.findById(userDTO.getId()).orElse(null);
         if (user != null) {
@@ -66,14 +63,14 @@ public class UserService {
         return null;
     }
 
-    public UserDTO getMe(HttpServletRequest request) {
+    public BaseUserDTO getMe(HttpServletRequest request) {
         FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
         if (firebaseToken != null) {
             log.info("Requested info for user: {}", firebaseToken.getUid());
-            UserDTO userDTO = getUserById(firebaseToken.getUid());
+            BaseUserDTO userDTO = getUserById(firebaseToken.getUid());
             if (userDTO != null) {
                 log.info("User found: {}", userDTO);
-                return finalizeUserDTO(userDTO);
+                return userDTO;
             }
             log.error("User not found for email: {}", firebaseToken.getEmail());
         }
@@ -81,7 +78,7 @@ public class UserService {
         return null;
     }
 
-    public UserDTO registerUser(HttpServletRequest request, String role) {
+    public BaseUserDTO registerUser(HttpServletRequest request, String role) {
         User user = firebaseService.getMinimalUser(request);
         if (user != null) {
             if (existUserByEmail(user.getEmail())) {
@@ -112,7 +109,7 @@ public class UserService {
         CanIDTO canIDTO = new CanIDTO();
         if (firebaseToken != null) {
             log.info("Requested info for user: {}", firebaseToken.getUid());
-            UserDTO userDTO = getUserById(firebaseToken.getUid());
+            UserDTO userDTO = (UserDTO) getUserById(firebaseToken.getUid());
             String subscriptionId = userDTO.getSubscriptionId();
             if (subscriptionId == null) {
                 log.info("User {} has no subscription", userDTO.getEmail());
@@ -142,7 +139,7 @@ public class UserService {
     }
 
 
-    private UserDTO finalizeUserDTO(UserDTO userDTO) {
+    private BaseUserDTO finalizeUserDTO(UserDTO userDTO) {
         if (userDTO.getSkillIds() == null) {
             userDTO.setSkillIds(new ArrayList<>());
             userDTO.setSkillList(new ArrayList<>());
@@ -150,7 +147,19 @@ public class UserService {
             List<SkillDTO> skillList = generateSkillDTOList(userDTO.getSkillIds());
             userDTO.setSkillList(skillList);
         }
-        return userDTO;
+        return mapUserByRole(userDTO);
+    }
+
+    private BaseUserDTO mapUserByRole(UserDTO userDTO){
+        switch (userDTO.getRoleId()) {
+            case UserType.LAVORATORE:
+                return LavoratoreDTO.fromUserDTOtoLavoratoreDTO(userDTO);
+            case UserType.DATORE:
+                return CompanyDTO.fromUserDTOtoCompanyDTO(userDTO);
+            default:
+                log.error("Unknown role: {}", userDTO.getRoleId());
+                return null;
+        }
     }
 
     private List<SkillDTO> generateSkillDTOList(List<String> skillIds) {

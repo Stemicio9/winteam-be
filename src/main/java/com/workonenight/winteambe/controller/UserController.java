@@ -3,6 +3,7 @@ package com.workonenight.winteambe.controller;
 import com.workonenight.winteambe.common.FilterCondition;
 import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
+import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.CanIDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.service.UserService;
@@ -31,20 +32,20 @@ public class UserController {
 
     /**
      * Get all users
-     * @return List<UserDTO>
+     * @return List<BaseUserDTO>
      */
     @GetMapping(value = "/list/all")
-    public List<UserDTO> getAllUser() {
+    public List<BaseUserDTO> getAllUser() {
         return userService.getAllUser();
     }
 
     /**
      * Get user by id
      * @param id        id of user
-     * @return UserDTO
+     * @return BaseUserDTO
      */
     @GetMapping(value = "/list/{id}")
-    public UserDTO getUserById(@PathVariable("id") String id) {
+    public BaseUserDTO getUserById(@PathVariable("id") String id) {
         return userService.getUserById(id);
     }
 
@@ -54,7 +55,7 @@ public class UserController {
      * @return UserDTO
      */
     @PostMapping(value = "/create")
-    public UserDTO createUser(@RequestBody UserDTO userDTO) {
+    public BaseUserDTO createUser(@RequestBody UserDTO userDTO) {
         return userService.createUser(userDTO);
     }
 
@@ -64,7 +65,7 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping(value = "/register")
-    public UserDTO registerUser(HttpServletRequest request, @RequestParam("role") String role) {
+    public BaseUserDTO registerUser(HttpServletRequest request, @RequestParam("role") String role) {
         return userService.registerUser(request, role);
     }
 
@@ -74,7 +75,7 @@ public class UserController {
      * @return UserDTO
      */
     @PostMapping(value = "/update")
-    public UserDTO updateUser(@RequestBody UserDTO userDTO) {
+    public BaseUserDTO updateUser(@RequestBody UserDTO userDTO) {
         return userService.updateUser(userDTO);
     }
 
@@ -84,7 +85,7 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping(value="/me")
-    public UserDTO getMe(HttpServletRequest request) {
+    public BaseUserDTO getMe(HttpServletRequest request) {
         return userService.getMe(request);
     }
 

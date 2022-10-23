@@ -4,6 +4,7 @@ import com.workonenight.winteambe.common.FilterCondition;
 import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
 import com.workonenight.winteambe.dto.AdvertisementDTO;
+import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.service.AdvertisementService;
 import com.workonenight.winteambe.service.other.FilterBuilderService;
 import org.springframework.data.domain.Page;
@@ -36,6 +37,15 @@ public class AdvertisementController {
     @GetMapping(value = "/list/all")
     public List<AdvertisementDTO> getAllAdvertisements() {
         return advertisementService.getAllAdvertisements();
+    }
+
+    /**
+     * Get all users related to advertisement
+     * @return List<UserDTO> List of users related to advertisement
+     */
+    @GetMapping(value = "/list/users")
+    public List<BaseUserDTO> getAllUsersRelated(@RequestParam(name = "id") String id) {
+        return advertisementService.getAllUsersRelated(id);
     }
 
     /**

@@ -2,10 +2,9 @@ package com.workonenight.winteambe.service;
 
 import com.google.firebase.auth.FirebaseToken;
 import com.workonenight.winteambe.dto.AdvertisementDTO;
-import com.workonenight.winteambe.dto.SkillDTO;
+import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.entity.Advertisement;
-import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.AdvertisementRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
 import com.workonenight.winteambe.utils.Utils;
@@ -54,7 +53,7 @@ public class AdvertisementService {
 
     public AdvertisementDTO createAdvertisement(HttpServletRequest request, AdvertisementDTO advertisementDTO) {
         log.info("Creating advertisement: '{}'", advertisementDTO.getTitle());
-        UserDTO userDTO = userService.getMe(request);
+        UserDTO userDTO = (UserDTO) userService.getMe(request);
         if (userDTO != null) {
             Advertisement advertisement = advertisementDTO.toEntity();
             advertisement.setId(null);
@@ -111,6 +110,19 @@ public class AdvertisementService {
     public List<AdvertisementDTO> getAllFiltered(Query query) {
         log.info("Get all advertisements filtered");
         return advertisementRepository.findAll(query).stream().map(Advertisement::toDTO).peek(this::finalizeAdvertisementDTO).collect(Collectors.toList());
+    }
+
+    public List<BaseUserDTO> getAllUsersRelated(String id) {
+        Advertisement advertisement = advertisementRepository.findById(id).orElse(null);
+        if (advertisement != null) {
+            List<String> userIdList = advertisement.getCandidateUserList();
+            List<BaseUserDTO> result = new ArrayList<>();
+            for (String userId : userIdList) {
+                result.add(userService.getUserById(userId));
+            }
+            return result;
+        }
+        return new ArrayList<>();
     }
 
 

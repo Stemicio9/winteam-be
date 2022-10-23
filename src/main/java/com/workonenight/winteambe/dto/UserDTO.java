@@ -12,16 +12,10 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDTO {
-    private String id;
+public class UserDTO extends BaseUserDTO {
     private String firstName;
     private String lastName;
     private String companyName;
-    private String email;
-    //role id to join in the role collection
-    private String roleId;
-    private String description;
-    private String brief;
 
     //skill id matched with skill DTO
     private List<String> skillIds;
@@ -29,12 +23,6 @@ public class UserDTO {
     private List<String> availabilityDays;
     private List<String> availabilityHourSlots;
     private List<String> availabilityCities;
-    private String address;
-    private String city;
-    private String province;
-    private String nation;
-    private String phoneNumber;
-    private String imageLink;
     private int contatoreAnnunci;
     //subscription id to join in the subscription collection
     private String subscriptionId;
@@ -48,24 +36,24 @@ public class UserDTO {
 
     public User toEntity(){
         User user = new User();
-        user.setId(this.id);
+        user.setId(this.getId());
         user.setFirstName(this.firstName);
         user.setLastName(this.lastName);
         user.setCompanyName(this.companyName);
-        user.setEmail(this.email);
-        user.setRoleId(this.roleId);
-        user.setDescription(this.description);
-        user.setBrief(this.brief);
+        user.setEmail(this.getEmail());
+        user.setRoleId(this.getRoleId());
+        user.setDescription(this.getDescription());
+        user.setBrief(this.getBrief());
         user.setSkillList(this.skillIds != null ? this.skillIds : new ArrayList<>());
         user.setAvailabilityDays(this.availabilityDays != null ? this.availabilityDays : new ArrayList<>());
         user.setAvailabilityHourSlots(this.availabilityHourSlots != null ? this.availabilityHourSlots : new ArrayList<>());
         user.setAvailabilityCities(this.availabilityCities != null ? this.availabilityCities : new ArrayList<>());
-        user.setAddress(this.address);
-        user.setCity(this.city);
-        user.setProvince(this.province);
-        user.setNation(this.nation);
-        user.setPhoneNumber(this.phoneNumber);
-        user.setImageLink(this.imageLink);
+        user.setAddress(this.getAddress());
+        user.setCity(this.getCity());
+        user.setProvince(this.getProvince());
+        user.setNation(this.getNation());
+        user.setPhoneNumber(this.getPhoneNumber());
+        user.setImageLink(this.getImageLink());
         user.setContatoreAnnunci(this.contatoreAnnunci);
         user.setSubscriptionId(this.subscriptionId);
         user.setLastSubscriptionDate(this.lastSubscriptionDate);

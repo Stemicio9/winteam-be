@@ -21,7 +21,7 @@ public class AdvertisementDTO {
 
     private Double payment;
     private String publisherUserId;
-    private UserDTO publisherUserDTO;
+    private BaseUserDTO publisherUserDTO;
     private List<String> candidateUserList;
     private String matchedUserId;
     private String advertisementStatus;

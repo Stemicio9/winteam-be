@@ -25,7 +25,6 @@ public class Utils {
             log.error("Hour slot not valid, must be MATTINA, POMERIGGIO, SERA or NOTTE ignoring case");
         }
     }
-
     public static String calculateAdvertisementStatus(LocalDateTime advertisementDate, String matchedUserId) {
         LocalDateTime now = LocalDateTime.now();
         //active state today is before advertisement date and matched user id is null
