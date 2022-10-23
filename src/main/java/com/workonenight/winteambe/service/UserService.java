@@ -9,8 +9,10 @@ import com.workonenight.winteambe.utils.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -34,15 +36,17 @@ public class UserService {
         this.skillService = skillService;
     }
 
-    public List<BaseUserDTO> getAllUser() {
+    public List<BaseUserDTO> getAllUser(HttpServletRequest request) {
         log.info("Get all user");
-        return userRepository.findAll().stream().map(User::toDTO).peek(this::finalizeUserDTO).collect(Collectors.toList());
+        return hasUserSubscription(request) ?
+                userRepository.findAll().stream().map(u -> this.finalizeUserDTO(u.toDTO())).collect(Collectors.toList()) :
+                userRepository.findAll().stream().map(u -> this.finalizeUserDTO(u.toDTOAnonymous())).collect(Collectors.toList());
     }
 
     public BaseUserDTO getUserById(String id) {
         log.info("Searching user for id: {}", id);
         Optional<User> opt = userRepository.findById(id);
-        return opt.map(User::toDTO).map(this::finalizeUserDTO).orElse(null);
+        return opt.map(u -> this.finalizeUserDTO(u.toDTO())).orElse(null);
     }
 
     public BaseUserDTO createUser(UserDTO userDTO) {
@@ -95,8 +99,12 @@ public class UserService {
     }
 
     //TODO fix this method
-    public Page<UserDTO> getPageFiltered(Query query, Pageable pageable) {
-        return userRepository.findAll(query, pageable).map(User::toDTO);
+    public Page<BaseUserDTO> getPageFiltered(HttpServletRequest request, Query query, Pageable pageable) {
+        query.addCriteria(Criteria.where("id").ne(firebaseService.getMinimalUser(request).getId())).addCriteria(Criteria.where("roleId").ne(UserType.ADMIN));
+        return hasUserSubscription(request) ?
+                userRepository.findAll(query, pageable).map(u -> this.finalizeUserDTO(u.toDTO())) :
+                userRepository.findAll(query, pageable).map(u -> this.finalizeUserDTO(u.toDTOAnonymous()));
+
     }
 
     public List<UserDTO> getAllFiltered(Query query) {
@@ -109,9 +117,9 @@ public class UserService {
         CanIDTO canIDTO = new CanIDTO();
         if (firebaseToken != null) {
             log.info("Requested info for user: {}", firebaseToken.getUid());
-            UserDTO userDTO = (UserDTO) getUserById(firebaseToken.getUid());
+            CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
             String subscriptionId = userDTO.getSubscriptionId();
-            if (subscriptionId == null) {
+            if (!StringUtils.hasLength(subscriptionId)) {
                 log.info("User {} has no subscription", userDTO.getEmail());
                 canIDTO.setResponse(false);
             } else {
@@ -150,9 +158,10 @@ public class UserService {
         return mapUserByRole(userDTO);
     }
 
-    private BaseUserDTO mapUserByRole(UserDTO userDTO){
+    private BaseUserDTO mapUserByRole(UserDTO userDTO) {
         switch (userDTO.getRoleId()) {
             case UserType.LAVORATORE:
+            case UserType.ADMIN:
                 return LavoratoreDTO.fromUserDTOtoLavoratoreDTO(userDTO);
             case UserType.DATORE:
                 return CompanyDTO.fromUserDTOtoCompanyDTO(userDTO);
@@ -175,5 +184,21 @@ public class UserService {
 
     private boolean existUserByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    private boolean hasUserSubscription(HttpServletRequest request) {
+        FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
+        if (firebaseToken != null) {
+            log.info("Requested info for user: {}", firebaseToken.getUid());
+            CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
+            if (userDTO != null) {
+                log.info("User found: {}", userDTO);
+                String subscriptionId = userDTO.getSubscriptionId();
+                return StringUtils.hasLength(subscriptionId) && subscriptionService.existsById(subscriptionId);
+            }
+            log.error("User not found for email: {}", firebaseToken.getEmail());
+        }
+        log.error("Token not found in request");
+        return false;
     }
 }

@@ -1,5 +1,7 @@
 package com.workonenight.winteambe.utils;
 
+import com.workonenight.winteambe.dto.AdvertisementDTO;
+import com.workonenight.winteambe.entity.Advertisement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 
@@ -25,21 +27,40 @@ public class Utils {
             log.error("Hour slot not valid, must be MATTINA, POMERIGGIO, SERA or NOTTE ignoring case");
         }
     }
-    public static String calculateAdvertisementStatus(LocalDateTime advertisementDate, String matchedUserId) {
+
+    public static String calculateAdvertisementStatusDatore(LocalDateTime advertisementDate, String matchedUserId) {
         LocalDateTime now = LocalDateTime.now();
         //active state today is before advertisement date and matched user id is null
         if ((now.isBefore(advertisementDate) || now.isEqual(advertisementDate)) && !StringUtils.hasLength(matchedUserId)) {
-            return AdvertisementState.ACTIVE;
+            return AdvertisementDatoreState.ACTIVE;
         }
         //accepted state: today is before advertisement date, matched user id is not null
         if (now.isBefore(advertisementDate) && StringUtils.hasLength(matchedUserId)) {
-            return AdvertisementState.ACCEPTED;
+            return AdvertisementDatoreState.ACCEPTED;
         }
         //history stare: adversement date is before today
         if (now.isAfter(advertisementDate)) {
-            return AdvertisementState.HISTORY;
+            return AdvertisementDatoreState.HISTORY;
         }
         return null;
+    }
+
+    public static String calculateAdvertisementStatusLavoratore(AdvertisementDTO advertisement, LocalDateTime advertisementDate, String currentUserId, String matchedUserId) {
+        LocalDateTime now = LocalDateTime.now();
+
+        //active state today is before advertisement date and matched user id is null
+        if ((now.isBefore(advertisementDate) || now.isEqual(advertisementDate)) && advertisement.getCandidateUserList().contains(currentUserId)) {
+            return AdvertisementLavoratoreState.CURRENT;
+        }
+        //accepted state: today is before advertisement date, matched user id is not null
+        if ((now.isBefore(advertisementDate) || now.isEqual(advertisementDate)) && StringUtils.hasLength(matchedUserId) && matchedUserId.equals(currentUserId)) {
+            return AdvertisementDatoreState.ACCEPTED;
+        }
+        //history stare: advertisement date is before today
+        if (now.isAfter(advertisementDate) && matchedUserId.equals(currentUserId)) {
+            return AdvertisementDatoreState.HISTORY;
+        }
+        return AdvertisementDatoreState.ALL;
     }
 
     public static class FirebaseClaims {
@@ -50,11 +71,19 @@ public class Utils {
         public static final String USER_ID = "user_id";
     }
 
-    public static class AdvertisementState {
+    public static class AdvertisementDatoreState {
         public static final String ALL = "all";
         public static final String ACTIVE = "active";
         public static final String ACCEPTED = "accepted";
         public static final String HISTORY = "history";
     }
+
+    public static class AdvertisementLavoratoreState {
+        public static final String ALL = "all";
+        public static final String CURRENT = "current";
+        public static final String ACCEPTED = "accepted";
+        public static final String HISTORY = "history";
+    }
+
 
 }

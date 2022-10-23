@@ -39,4 +39,8 @@ public class SubscriptionService {
         }
         return null;
     }
+
+    public boolean existsById(String id) {
+        return subscriptionRepository.existsById(id);
+    }
 }

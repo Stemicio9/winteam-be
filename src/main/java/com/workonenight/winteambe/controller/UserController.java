@@ -32,16 +32,18 @@ public class UserController {
 
     /**
      * Get all users
+     *
      * @return List<BaseUserDTO>
      */
     @GetMapping(value = "/list/all")
-    public List<BaseUserDTO> getAllUser() {
-        return userService.getAllUser();
+    public List<BaseUserDTO> getAllUser(HttpServletRequest request) {
+        return userService.getAllUser(request);
     }
 
     /**
      * Get user by id
-     * @param id        id of user
+     *
+     * @param id id of user
      * @return BaseUserDTO
      */
     @GetMapping(value = "/list/{id}")
@@ -51,7 +53,8 @@ public class UserController {
 
     /**
      * Create user
-     * @param userDTO       UserDTO
+     *
+     * @param userDTO UserDTO
      * @return UserDTO
      */
     @PostMapping(value = "/create")
@@ -61,7 +64,8 @@ public class UserController {
 
     /**
      * Register user
-     * @param request       HttpServletRequest
+     *
+     * @param request HttpServletRequest
      * @return UserDTO
      */
     @GetMapping(value = "/register")
@@ -71,7 +75,8 @@ public class UserController {
 
     /**
      * Update user
-     * @param userDTO       UserDTO
+     *
+     * @param userDTO UserDTO
      * @return UserDTO
      */
     @PostMapping(value = "/update")
@@ -81,10 +86,11 @@ public class UserController {
 
     /**
      * Get current user
-     * @param request       HttpServletRequest
+     *
+     * @param request HttpServletRequest
      * @return UserDTO
      */
-    @GetMapping(value="/me")
+    @GetMapping(value = "/me")
     public BaseUserDTO getMe(HttpServletRequest request) {
         return userService.getMe(request);
     }
@@ -99,14 +105,15 @@ public class UserController {
      * @return PageResponse<UserDTO>
      */
     @GetMapping(value = "/page")
-    public ResponseEntity<PageResponse<UserDTO>> getSearchCriteriaPage(
+    public ResponseEntity<PageResponse<BaseUserDTO>> getSearchCriteriaPage(
+            HttpServletRequest request,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "filterOr", required = false) String filterOr,
             @RequestParam(value = "filterAnd", required = false) String filterAnd,
             @RequestParam(value = "orders", required = false) String orders) {
 
-        PageResponse<UserDTO> response = new PageResponse<>();
+        PageResponse<BaseUserDTO> response = new PageResponse<>();
 
         Pageable pageable = filterBuilderService.getPageable(size, page, orders);
         GenericFilterCriteriaBuilder filterCriteriaBuilder = new GenericFilterCriteriaBuilder();
@@ -116,7 +123,7 @@ public class UserController {
         List<FilterCondition> orConditions = filterBuilderService.createFilterCondition(filterOr);
 
         Query query = filterCriteriaBuilder.addCondition(andConditions, orConditions);
-        Page<UserDTO> pg = userService.getPageFiltered(query, pageable);
+        Page<BaseUserDTO> pg = userService.getPageFiltered(request, query, pageable);
         response.setPageStats(pg, pg.getContent());
 
         return new ResponseEntity<>(response, HttpStatus.OK);

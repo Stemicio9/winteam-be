@@ -29,18 +29,14 @@ public class Advertisement implements Serializable {
 
     //convert entity to DTO
     public AdvertisementDTO toDTO() {
-        AdvertisementDTO advertisementDTO = new AdvertisementDTO();
-        advertisementDTO.setId(this.id);
-        advertisementDTO.setTitle(this.title);
-        advertisementDTO.setDescription(this.description);
-        advertisementDTO.setDate(this.date.format(Utils.DATE_TIME_FORMATTER));
-        advertisementDTO.setHourSlot(this.hourSlot);
-        advertisementDTO.setSkillId(this.skillId);
-        advertisementDTO.setPayment(this.payment);
-        advertisementDTO.setPublisherUserId(this.publisherUserId);
-        advertisementDTO.setCandidateUserList(this.candidateUserList != null ? candidateUserList :  new ArrayList<>());
-        advertisementDTO.setMatchedUserId(this.matchedUserId);
-        advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatus(this.date, this.matchedUserId));
+        AdvertisementDTO advertisementDTO = finalizeDTOProcess();
+        advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatusDatore(this.date, this.matchedUserId));
+        return advertisementDTO;
+    }
+
+    public AdvertisementDTO toDTOLavoratore(String currentUserId) {
+        AdvertisementDTO advertisementDTO = finalizeDTOProcess();
+        advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatusLavoratore(advertisementDTO, this.date, currentUserId, this.matchedUserId));
         return advertisementDTO;
     }
 
@@ -55,5 +51,20 @@ public class Advertisement implements Serializable {
         this.candidateUserList = advertisementDTO.getCandidateUserList().size() == 0 ? new ArrayList<>() : advertisementDTO.getCandidateUserList();
         this.matchedUserId = advertisementDTO.getMatchedUserId();
         return this;
+    }
+
+    private AdvertisementDTO finalizeDTOProcess(){
+        AdvertisementDTO advertisementDTO = new AdvertisementDTO();
+        advertisementDTO.setId(this.id);
+        advertisementDTO.setTitle(this.title);
+        advertisementDTO.setDescription(this.description);
+        advertisementDTO.setDate(this.date.format(Utils.DATE_TIME_FORMATTER));
+        advertisementDTO.setHourSlot(this.hourSlot);
+        advertisementDTO.setSkillId(this.skillId);
+        advertisementDTO.setPayment(this.payment);
+        advertisementDTO.setPublisherUserId(this.publisherUserId);
+        advertisementDTO.setCandidateUserList(this.candidateUserList != null ? candidateUserList :  new ArrayList<>());
+        advertisementDTO.setMatchedUserId(this.matchedUserId);
+        return advertisementDTO;
     }
 }

@@ -95,6 +95,8 @@ public class AdvertisementController {
      */
     @GetMapping(value = "/page")
     public ResponseEntity<PageResponse<AdvertisementDTO>> getSearchCriteriaPage(
+            HttpServletRequest request,
+            @RequestParam(value = "state", defaultValue = "all", required = false) String state,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "filterOr", required = false) String filterOr,
@@ -110,7 +112,7 @@ public class AdvertisementController {
         List<FilterCondition> orConditions = filterBuilderService.createFilterCondition(filterOr);
 
         Query query = filterCriteriaBuilder.addCondition(andConditions, orConditions);
-        Page<AdvertisementDTO> pg = advertisementService.getPageFiltered(query, pageable);
+        Page<AdvertisementDTO> pg = advertisementService.getPageFiltered(request, state, query, pageable);
         response.setPageStats(pg, pg.getContent());
 
         return new ResponseEntity<>(response, HttpStatus.OK);

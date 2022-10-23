@@ -5,11 +5,14 @@ import com.workonenight.winteambe.dto.AdvertisementDTO;
 import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.entity.Advertisement;
+import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.AdvertisementRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
+import com.workonenight.winteambe.utils.UserType;
 import com.workonenight.winteambe.utils.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
@@ -87,7 +90,7 @@ public class AdvertisementService {
             String userId = firebaseToken.getUid();
             List<Advertisement> advertisements = advertisementRepository.findAllByPublisherUserId(userId);
             log.info("Found {} advertisements", advertisements.size());
-            if (!Objects.equals(state, Utils.AdvertisementState.ALL)) {
+            if (!Objects.equals(state, Utils.AdvertisementDatoreState.ALL)) {
                 return advertisements.stream().map(Advertisement::toDTO).filter(advertisementDTO -> advertisementDTO.getAdvertisementStatus().equals(state)).peek(this::finalizeAdvertisementDTO).collect(Collectors.toList());
             } else {
                 return advertisements.stream().map(Advertisement::toDTO).peek(this::finalizeAdvertisementDTO).collect(Collectors.toList());
@@ -99,12 +102,27 @@ public class AdvertisementService {
         return List.of();
     }
 
-    public Page<AdvertisementDTO> getPageFiltered(Query query, Pageable pageable) {
+    public Page<AdvertisementDTO> getPageFiltered(HttpServletRequest request, String state, Query query, Pageable pageable) {
         log.info("Entering method getPageFiltered");
         log.info("Query: {}", query);
-        Page<AdvertisementDTO> page = advertisementRepository.findAll(query, pageable).map(Advertisement::toDTO);
-        log.info("Found {} advertisements", page.getTotalElements());
-        return page;
+        BaseUserDTO user = userService.getUserById(firebaseService.getFirebaseToken(request).getUid());
+        String userRole = user.getRoleId();
+        switch (userRole) {
+            case UserType.DATORE:
+                return advertisementRepository.findAll(query, pageable).map(Advertisement::toDTO).map(this::finalizeAdvertisementDTO);
+            case UserType.LAVORATORE:
+                String userId = user.getId();
+                if (Objects.equals(state, Utils.AdvertisementDatoreState.ALL)) {
+                    return advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
+                } else {
+                    Page<AdvertisementDTO> page = advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
+                    List<AdvertisementDTO> content = page.getContent();
+                    return new PageImpl<>(content.stream().filter(advertisementDTO -> advertisementDTO.getAdvertisementStatus().equals(state)).collect(Collectors.toList()), pageable, page.getTotalElements());
+                }
+            default:
+                log.error("User role not valid");
+                return null;
+        }
     }
 
     public List<AdvertisementDTO> getAllFiltered(Query query) {

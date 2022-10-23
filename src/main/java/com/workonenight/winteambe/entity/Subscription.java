@@ -32,6 +32,7 @@ public class Subscription implements Serializable {
         subscriptionDTO.setSearchEnabled(this.searchEnabled);
         subscriptionDTO.setSearchEnabled(this.createAdvertisementEnabled);
         subscriptionDTO.setImageLink(this.imageLink);
+        subscriptionDTO.setCreateAdvertisementEnabled(this.createAdvertisementEnabled);
         return subscriptionDTO;
     }
 

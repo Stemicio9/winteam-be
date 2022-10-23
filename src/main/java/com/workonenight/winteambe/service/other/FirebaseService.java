@@ -36,6 +36,16 @@ public class FirebaseService {
         return null;
     }
 
+    public String getUserRole(HttpServletRequest request) {
+        FirebaseToken firebaseToken = getFirebaseToken(request);
+        if (firebaseToken != null) {
+            User u = new User(firebaseToken.getUid(), firebaseToken.getEmail());
+            log.info("Check role for user {}", u);
+            return u.getRoleId();
+        }
+        return null;
+    }
+
     //parse all firebase token claims
     public Map<String, Object> parseToken(HttpServletRequest request) {
         FirebaseToken firebaseToken = getFirebaseToken(request);

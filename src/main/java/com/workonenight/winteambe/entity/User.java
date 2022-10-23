@@ -58,7 +58,7 @@ public class User implements Serializable {
         userDTO.setLastName(Utils.ANONYMOUS);
         userDTO.setCompanyName(Utils.ANONYMOUS);
         userDTO.setEmail(Utils.ANONYMOUS + this.email.split("@")[1]);
-        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + Utils.ANONYMOUS);
+        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + " " + Utils.ANONYMOUS);
         userDTO.setDescription(Utils.ANONYMOUS);
         userDTO.setBrief(Utils.ANONYMOUS);
         userDTO.setAddress(Utils.ANONYMOUS);
