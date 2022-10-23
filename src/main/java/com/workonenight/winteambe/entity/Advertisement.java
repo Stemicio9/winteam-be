@@ -21,7 +21,7 @@ public class Advertisement implements Serializable {
     private String description;
     private LocalDateTime date;
     private String hourSlot;
-    private String skill;
+    private String skillId;
     private Double payment;
     private String publisherUserId;
     private List<String> candidateUserList;
@@ -35,10 +35,10 @@ public class Advertisement implements Serializable {
         advertisementDTO.setDescription(this.description);
         advertisementDTO.setDate(this.date.format(Utils.DATE_TIME_FORMATTER));
         advertisementDTO.setHourSlot(this.hourSlot);
-        advertisementDTO.setSkill(this.skill);
+        advertisementDTO.setSkillId(this.skillId);
         advertisementDTO.setPayment(this.payment);
         advertisementDTO.setPublisherUserId(this.publisherUserId);
-        advertisementDTO.setCandidateUserList(this.candidateUserList.size() == 0 ? new ArrayList<>() : this.candidateUserList);
+        advertisementDTO.setCandidateUserList(this.candidateUserList != null ? candidateUserList :  new ArrayList<>());
         advertisementDTO.setMatchedUserId(this.matchedUserId);
         advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatus(this.date, this.matchedUserId));
         return advertisementDTO;
@@ -49,7 +49,7 @@ public class Advertisement implements Serializable {
         this.description = advertisementDTO.getDescription();
         this.date = LocalDateTime.parse(advertisementDTO.getDate());
         this.hourSlot = advertisementDTO.getHourSlot();
-        this.skill = advertisementDTO.getSkill();
+        this.skillId = advertisementDTO.getSkillId();
         this.payment = advertisementDTO.getPayment();
         this.publisherUserId = advertisementDTO.getPublisherUserId();
         this.candidateUserList = advertisementDTO.getCandidateUserList().size() == 0 ? new ArrayList<>() : advertisementDTO.getCandidateUserList();

@@ -4,6 +4,7 @@ import com.workonenight.winteambe.entity.Advertisement;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -13,9 +14,14 @@ public class AdvertisementDTO {
     private String description;
     private String date;
     private String hourSlot;
-    private String skill;
+
+    //skill id matched with skill DTO
+    private String skillId;
+    private SkillDTO skillDTO;
+
     private Double payment;
     private String publisherUserId;
+    private UserDTO publisherUserDTO;
     private List<String> candidateUserList;
     private String matchedUserId;
     private String advertisementStatus;
@@ -28,10 +34,10 @@ public class AdvertisementDTO {
         advertisement.setDescription(this.description);
         advertisement.setDate(LocalDateTime.parse(this.date));
         advertisement.setHourSlot(this.hourSlot);
-        advertisement.setSkill(this.skill);
+        advertisement.setSkillId(this.skillId);
         advertisement.setPayment(this.payment);
         advertisement.setPublisherUserId(this.publisherUserId);
-        advertisement.setCandidateUserList(this.candidateUserList);
+        advertisement.setCandidateUserList((this.candidateUserList != null) ? this.candidateUserList : new ArrayList<>());
         advertisement.setMatchedUserId(this.matchedUserId);
         return advertisement;
     }

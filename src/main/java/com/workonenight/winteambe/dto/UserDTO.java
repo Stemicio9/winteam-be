@@ -22,8 +22,9 @@ public class UserDTO {
     private String roleId;
     private String description;
     private String brief;
-    private List<String> skillIds;
 
+    //skill id matched with skill DTO
+    private List<String> skillIds;
     private List<SkillDTO> skillList;
     private List<String> availabilityDays;
     private List<String> availabilityHourSlots;
@@ -55,10 +56,10 @@ public class UserDTO {
         user.setRoleId(this.roleId);
         user.setDescription(this.description);
         user.setBrief(this.brief);
-        user.setSkillList((this.skillIds != null && this.skillIds.size() > 0) ? this.skillIds : new ArrayList<>());
-        user.setAvailabilityDays((this.availabilityDays != null && this.availabilityDays.size() > 0) ? this.availabilityDays : new ArrayList<>());
-        user.setAvailabilityHourSlots((this.availabilityHourSlots != null && this.availabilityHourSlots.size() > 0) ? this.availabilityHourSlots : new ArrayList<>());
-        user.setAvailabilityCities((this.availabilityCities != null && this.availabilityCities.size() > 0) ? this.availabilityCities : new ArrayList<>());
+        user.setSkillList(this.skillIds != null ? this.skillIds : new ArrayList<>());
+        user.setAvailabilityDays(this.availabilityDays != null ? this.availabilityDays : new ArrayList<>());
+        user.setAvailabilityHourSlots(this.availabilityHourSlots != null ? this.availabilityHourSlots : new ArrayList<>());
+        user.setAvailabilityCities(this.availabilityCities != null ? this.availabilityCities : new ArrayList<>());
         user.setAddress(this.address);
         user.setCity(this.city);
         user.setProvince(this.province);

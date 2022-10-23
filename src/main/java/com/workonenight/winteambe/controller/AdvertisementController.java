@@ -54,8 +54,8 @@ public class AdvertisementController {
      * @return AdvertisementDTO Advertisement
      */
     @PostMapping(value = "/create")
-    public AdvertisementDTO createAdvertisement(@RequestBody AdvertisementDTO advertisementDTO) {
-        return advertisementService.createAdvertisement(advertisementDTO);
+    public AdvertisementDTO createAdvertisement(HttpServletRequest request, @RequestBody AdvertisementDTO advertisementDTO) {
+        return advertisementService.createAdvertisement(request, advertisementDTO);
     }
 
     /**

@@ -45,24 +45,14 @@ public class UserService {
     public UserDTO getUserById(String id) {
         log.info("Searching user for id: {}", id);
         Optional<User> opt = userRepository.findById(id);
-        if (opt.isPresent()) {
-            UserDTO userDTO = opt.get().toDTO();
-            if (userDTO.getSkillIds() == null) {
-                userDTO.setSkillIds(new ArrayList<>());
-                userDTO.setSkillList(new ArrayList<>());
-            } else {
-                List<SkillDTO> skillList = generateSkillDTOList(userDTO.getSkillIds());
-                userDTO.setSkillList(skillList);
-            }
-            return userDTO;
-        }
-        return null;
+        return opt.map(User::toDTO).map(this::finalizeUserDTO).orElse(null);
     }
 
     public UserDTO createUser(UserDTO userDTO) {
         log.info("Creating user: " + userDTO.getEmail());
         User user = userDTO.toEntity();
-        return userRepository.save(user).toDTO();
+        UserDTO result = userRepository.save(user).toDTO();
+        return finalizeUserDTO(result);
     }
 
     public UserDTO updateUser(UserDTO userDTO) {
@@ -70,7 +60,8 @@ public class UserService {
         User user = userRepository.findById(userDTO.getId()).orElse(null);
         if (user != null) {
             user = user.toUpdateEntity(userDTO);
-            return userRepository.save(user).toDTO();
+            UserDTO updatedUser = userRepository.save(user).toDTO();
+            return finalizeUserDTO(updatedUser);
         }
         return null;
     }
@@ -82,23 +73,12 @@ public class UserService {
             UserDTO userDTO = getUserById(firebaseToken.getUid());
             if (userDTO != null) {
                 log.info("User found: {}", userDTO);
-                return userDTO;
+                return finalizeUserDTO(userDTO);
             }
             log.error("User not found for email: {}", firebaseToken.getEmail());
         }
         log.error("Token not found in request");
         return null;
-    }
-
-    private List<SkillDTO> generateSkillDTOList(List<String> skillIds) {
-        List<SkillDTO> res = new ArrayList<>();
-        for (String id : skillIds) {
-            SkillDTO skillDTO = skillService.getSkillById(id);
-            if (skillDTO != null) {
-                res.add(skillDTO);
-            }
-        }
-        return res;
     }
 
     public UserDTO registerUser(HttpServletRequest request, String role) {
@@ -110,27 +90,21 @@ public class UserService {
             }
             user.setRoleId(UserType.isRole(role) ? role : UserType.LAVORATORE);
             log.info("Registering user: " + user.getEmail());
-            return userRepository.save(user).toDTO();
+            UserDTO result = userRepository.save(user).toDTO();
+            return finalizeUserDTO(result);
         }
         log.error("Error during user registration");
         return null;
     }
 
+    //TODO fix this method
     public Page<UserDTO> getPageFiltered(Query query, Pageable pageable) {
         return userRepository.findAll(query, pageable).map(User::toDTO);
     }
 
     public List<UserDTO> getAllFiltered(Query query) {
         log.info("Get all user filtered");
-        return userRepository.findAll(query).stream().map(User::toDTO).collect(Collectors.toList());
-    }
-
-    private boolean existUserByEmail(String email) {
-        return userRepository.findUserByEmail(email).isPresent();
-    }
-
-    private User getUserByEmail(String email) {
-        return userRepository.findUserByEmail(email).orElse(null);
+        return userRepository.findAll(query).stream().map(User::toDTO).peek(this::finalizeUserDTO).collect(Collectors.toList());
     }
 
     public CanIDTO canI(HttpServletRequest request, String what) {
@@ -165,5 +139,32 @@ public class UserService {
         }
         log.error("Token not found in request");
         return null;
+    }
+
+
+    private UserDTO finalizeUserDTO(UserDTO userDTO) {
+        if (userDTO.getSkillIds() == null) {
+            userDTO.setSkillIds(new ArrayList<>());
+            userDTO.setSkillList(new ArrayList<>());
+        } else {
+            List<SkillDTO> skillList = generateSkillDTOList(userDTO.getSkillIds());
+            userDTO.setSkillList(skillList);
+        }
+        return userDTO;
+    }
+
+    private List<SkillDTO> generateSkillDTOList(List<String> skillIds) {
+        List<SkillDTO> res = new ArrayList<>();
+        for (String id : skillIds) {
+            SkillDTO skillDTO = skillService.getSkillById(id);
+            if (skillDTO != null) {
+                res.add(skillDTO);
+            }
+        }
+        return res;
+    }
+
+    private boolean existUserByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 }

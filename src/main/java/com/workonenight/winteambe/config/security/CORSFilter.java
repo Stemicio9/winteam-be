@@ -24,23 +24,21 @@ public class CORSFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
 
 
-
         // Production
         //         response.setHeader("Access-Control-Allow-Origin", "http://51.38.48.175");
         // Developement
 
         String currentOrigin = ((HttpServletRequest) req).getHeader("Origin");
-        System.out.println("origin: " + currentOrigin);
-        System.out.println("COOKIE : " + ((HttpServletRequest) req).getHeader("Cookie"));
-        if(inWhiteList(currentOrigin)){
-            System.out.println("PRESENTE IN WHITE LIST");
+        // System.out.println("origin: " + currentOrigin);
+        // System.out.println("COOKIE : " + ((HttpServletRequest) req).getHeader("Cookie"));
+        if (inWhiteList(currentOrigin)) {
+            // System.out.println("PRESENTE IN WHITE LIST");
             response.setHeader("Access-Control-Allow-Origin", currentOrigin);
-        }else{
-            System.out.println("NON PRESENTE IN WHITE LIST");
+        } else {
+            // System.out.println("NON PRESENTE IN WHITE LIST");
             response.setHeader("Access-Control-Allow-Origin", currentOrigin);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            //response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
-
 
 
         response.setHeader("Access-Control-Allow-Methods", "POST, PUT, GET, OPTIONS, DELETE");
@@ -52,13 +50,13 @@ public class CORSFilter implements Filter {
 
         if (!(request.getMethod().equalsIgnoreCase("OPTIONS"))) {
             try {
-                System.out.println("ESEGUO IL DOFILTER PER IL METODO NON DEL TIPO OPTIONS CORSFILTER");
+                //System.out.println("ESEGUO IL DOFILTER PER IL METODO NON DEL TIPO OPTIONS CORSFILTER");
                 chain.doFilter(req, res);
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         } else {
-            System.out.println("Pre-flight");
+            //System.out.println("Pre-flight");
             response.setHeader("Access-Control-Allow-Methods", "POST,GET,DELETE");
             response.setHeader("Access-Control-Max-Age", "3600");
             response.setHeader("Access-Control-Allow-Headers", "authorization, content-type," +
@@ -69,9 +67,9 @@ public class CORSFilter implements Filter {
     }
 
 
-    private boolean inWhiteList(String control){
-        for(String s : whiteListDomains){
-            if(s.equalsIgnoreCase(control)) return true;
+    private boolean inWhiteList(String control) {
+        for (String s : whiteListDomains) {
+            if (s.equalsIgnoreCase(control)) return true;
         }
         return false;
     }

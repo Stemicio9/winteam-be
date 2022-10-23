@@ -115,9 +115,9 @@ public class User implements Serializable {
         userDTO.setFirstName(this.firstName);
         userDTO.setRoleId(this.roleId);
         userDTO.setSkillIds(this.skillList);
-        userDTO.setAvailabilityDays((this.availabilityDays != null && this.availabilityDays.size() > 0) ? this.availabilityDays : new ArrayList<>());
-        userDTO.setAvailabilityHourSlots((this.availabilityHourSlots != null && this.availabilityHourSlots.size() > 0) ? this.availabilityHourSlots : new ArrayList<>());
-        userDTO.setAvailabilityCities((this.availabilityCities != null && this.availabilityCities.size() > 0) ? this.availabilityCities : new ArrayList<>());
+        userDTO.setAvailabilityDays(this.availabilityDays != null ? this.availabilityDays : new ArrayList<>());
+        userDTO.setAvailabilityHourSlots(this.availabilityHourSlots != null ? this.availabilityHourSlots : new ArrayList<>());
+        userDTO.setAvailabilityCities(this.availabilityCities != null ? this.availabilityCities : new ArrayList<>());
         userDTO.setImageLink(this.imageLink);
         userDTO.setContatoreAnnunci(this.contatoreAnnunci);
         userDTO.setSubscriptionId(this.subscriptionId);
