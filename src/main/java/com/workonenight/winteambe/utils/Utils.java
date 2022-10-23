@@ -1,7 +1,6 @@
 package com.workonenight.winteambe.utils;
 
 import com.workonenight.winteambe.dto.AdvertisementDTO;
-import com.workonenight.winteambe.entity.Advertisement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 

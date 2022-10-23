@@ -5,7 +5,6 @@ import com.workonenight.winteambe.dto.AdvertisementDTO;
 import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.entity.Advertisement;
-import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.AdvertisementRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
 import com.workonenight.winteambe.utils.UserType;
