@@ -152,7 +152,7 @@ public class AdvertisementController {
     @PostMapping(value = "/candidate")
     public ResponseEntity<AdvertisementDTO> candidateUser(HttpServletRequest request,
                                                       @RequestBody CandidateAdvertisementRequest candidateAdvertisementRequest) {
-        AdvertisementDTO advertisementDTO = advertisementService.candidateUser(request, candidateAdvertisementRequest.getUserId(), candidateAdvertisementRequest.getAdvertisementId());
+        AdvertisementDTO advertisementDTO = advertisementService.candidateUser(request, candidateAdvertisementRequest.getAdvertisementId());
         return new ResponseEntity<>(advertisementDTO, HttpStatus.OK);
     }
 

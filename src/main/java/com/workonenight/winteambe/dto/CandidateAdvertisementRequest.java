@@ -8,6 +8,5 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CandidateAdvertisementRequest {
-    private String userId;
     private String advertisementId;
 }

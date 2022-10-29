@@ -53,13 +53,17 @@ public class Utils {
         }
         //accepted state: today is before advertisement date, matched user id is not null
         if ((now.isBefore(advertisementDate) || now.isEqual(advertisementDate)) && StringUtils.hasLength(matchedUserId) && matchedUserId.equals(currentUserId)) {
-            return AdvertisementDatoreState.ACCEPTED;
+            return AdvertisementLavoratoreState.ACCEPTED;
         }
-        //history stare: advertisement date is before today
-        if (now.isAfter(advertisementDate) && matchedUserId.equals(currentUserId)) {
-            return AdvertisementDatoreState.HISTORY;
+        //history state: advertisement date is before today
+        if (now.isAfter(advertisementDate) && (matchedUserId.equals(currentUserId) || advertisement.getCandidateUserList().contains(currentUserId))) {
+            return AdvertisementLavoratoreState.HISTORY;
         }
-        return AdvertisementDatoreState.ALL;
+        //ignored state: advertisement date is before today and current user is not matched user and not in candidate list
+        if (now.isAfter(advertisementDate) && !matchedUserId.equals(currentUserId) && !advertisement.getCandidateUserList().contains(currentUserId)) {
+            return AdvertisementLavoratoreState.IGNORED;
+        }
+        return AdvertisementLavoratoreState.ALL;
     }
 
     public static class FirebaseClaims {
@@ -82,6 +86,7 @@ public class Utils {
         public static final String CURRENT = "current";
         public static final String ACCEPTED = "accepted";
         public static final String HISTORY = "history";
+        public static final String IGNORED = "ignored";
     }
 
 

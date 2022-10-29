@@ -106,18 +106,28 @@ public class AdvertisementService {
         log.info("Query: {}", query);
         BaseUserDTO user = userService.getUserById(firebaseService.getFirebaseToken(request).getUid());
         String userRole = user.getRoleId();
+        String userId = user.getId();
         switch (userRole) {
             case UserType.DATORE:
-                return advertisementRepository.findAll(query, pageable).map(Advertisement::toDTO).map(this::finalizeAdvertisementDTO);
+                Page<AdvertisementDTO> pageDatore = advertisementRepository.findAll(query, pageable).map(Advertisement::toDTO).map(this::finalizeAdvertisementDTO);
+                List<AdvertisementDTO> contentDatore = pageDatore.getContent().stream().filter(a -> a.getPublisherUserId().equals(userId)).collect(Collectors.toList());
+                return new PageImpl<>(contentDatore, pageable, pageDatore.getTotalElements());
             case UserType.LAVORATORE:
-                String userId = user.getId();
-                if (Objects.equals(state, Utils.AdvertisementDatoreState.ALL)) {
-                    return advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
+                Page<AdvertisementDTO> pageLavoratore = advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
+                List<AdvertisementDTO> contentLavoratore = pageLavoratore.getContent();
+                if (Objects.equals(state, Utils.AdvertisementLavoratoreState.ALL)) {
+                    contentLavoratore = contentLavoratore.stream()
+                            .filter(a ->
+                                    !a.getAdvertisementStatus().equals(Utils.AdvertisementLavoratoreState.HISTORY) &&
+                                            !a.getAdvertisementStatus().equals(Utils.AdvertisementLavoratoreState.IGNORED))
+                            .collect(Collectors.toList());
                 } else {
-                    Page<AdvertisementDTO> page = advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
-                    List<AdvertisementDTO> content = page.getContent();
-                    return new PageImpl<>(content.stream().filter(advertisementDTO -> advertisementDTO.getAdvertisementStatus().equals(state)).collect(Collectors.toList()), pageable, page.getTotalElements());
+                    contentLavoratore = contentLavoratore.stream()
+                            .filter(a ->
+                                    a.getAdvertisementStatus().equals(state))
+                            .collect(Collectors.toList());
                 }
+                return new PageImpl<>(contentLavoratore, pageable, pageLavoratore.getTotalElements());
             default:
                 log.error("User role not valid");
                 return null;
@@ -143,7 +153,7 @@ public class AdvertisementService {
     }
 
     public AdvertisementDTO matchUser(HttpServletRequest request, String userId, String advertisementId) {
-        if(!StringUtils.hasLength(userId) || !StringUtils.hasLength(advertisementId)){
+        if (!StringUtils.hasLength(userId) || !StringUtils.hasLength(advertisementId)) {
             log.error("User id or advertisement id is null, check your request");
             return null;
         }
@@ -172,28 +182,24 @@ public class AdvertisementService {
         return null;
     }
 
-    public AdvertisementDTO candidateUser(HttpServletRequest request, String userId, String advertisementId) {
-        if(!StringUtils.hasLength(userId) || !StringUtils.hasLength(advertisementId)){
-            log.error("User id or advertisement id is null, check your request");
+    public AdvertisementDTO candidateUser(HttpServletRequest request, String advertisementId) {
+        if (!StringUtils.hasLength(advertisementId)) {
+            log.error("Advertisement id is null, check your request");
             return null;
         }
         Optional<Advertisement> opt = advertisementRepository.findById(advertisementId);
         if (opt.isPresent()) {
             Advertisement advertisement = opt.get();
-            String userRequestId = firebaseService.getFirebaseToken(request).getUid();
-            if (userId.equals(userRequestId)) {
-                List<String> candidateUserList = advertisement.getCandidateUserList();
-                if (candidateUserList.contains(userId)) {
-                    log.error("Cannot candidate a user that is already in the candidate list");
-                } else {
-                    candidateUserList.add(userId);
-                    advertisement.setCandidateUserList(candidateUserList);
-                    log.info("Candidate user {} in advertisement {}", userId, advertisementId);
-                    advertisementRepository.save(advertisement);
-                    return finalizeAdvertisementDTO(advertisement.toDTO());
-                }
+            String userId = firebaseService.getFirebaseToken(request).getUid();
+            List<String> candidateUserList = advertisement.getCandidateUserList();
+            if (candidateUserList.contains(userId)) {
+                log.error("Cannot candidate a user that is already in the candidate list");
             } else {
-                log.error("User {} not authorized to candidate other user for advertisement {}", userRequestId, advertisementId);
+                candidateUserList.add(userId);
+                advertisement.setCandidateUserList(candidateUserList);
+                log.info("Candidate user {} in advertisement {}", userId, advertisementId);
+                advertisementRepository.save(advertisement);
+                return finalizeAdvertisementDTO(advertisement.toDTO());
             }
         } else {
             log.error("Advertisement {} not found", advertisementId);
@@ -216,7 +222,6 @@ public class AdvertisementService {
         }
         return advertisementDTO;
     }
-
 
 
 }
