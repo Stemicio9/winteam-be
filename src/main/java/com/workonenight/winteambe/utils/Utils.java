@@ -41,7 +41,7 @@ public class Utils {
         if (now.isAfter(advertisementDate)) {
             return AdvertisementDatoreState.HISTORY;
         }
-        return null;
+        return AdvertisementDatoreState.ALL;
     }
 
     public static String calculateAdvertisementStatusLavoratore(AdvertisementDTO advertisement, LocalDateTime advertisementDate, String currentUserId, String matchedUserId) {
