@@ -67,6 +67,8 @@ public class FirebaseService {
                 log.error("Error verifying token: {}", e.getMessage());
                 return null;
             }
+        }else{
+            log.error("No token found in request");
         }
         return null;
     }

@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
@@ -142,23 +143,57 @@ public class AdvertisementService {
     }
 
     public AdvertisementDTO matchUser(HttpServletRequest request, String userId, String advertisementId) {
+        if(!StringUtils.hasLength(userId) || !StringUtils.hasLength(advertisementId)){
+            log.error("User id or advertisement id is null, check your request");
+            return null;
+        }
         Optional<Advertisement> opt = advertisementRepository.findById(advertisementId);
         if (opt.isPresent()) {
             Advertisement advertisement = opt.get();
             String userRequestId = firebaseService.getFirebaseToken(request).getUid();
             if (advertisement.getPublisherUserId().equals(userRequestId)) {
-                if (!advertisement.getCandidateUserList().contains(userId)) {
+                List<String> candidateUserList = advertisement.getCandidateUserList();
+                if (!candidateUserList.contains(userId)) {
                     log.error("Cannot match a user that is not in the candidate list");
                 } else {
-                    List<String> candidateUserList = advertisement.getCandidateUserList();
                     candidateUserList.remove(userId);
                     advertisement.setCandidateUserList(candidateUserList);
                     advertisement.setMatchedUserId(userId);
+                    log.info("Matched user {} with advertisement {}", userId, advertisementId);
                     advertisementRepository.save(advertisement);
                     return finalizeAdvertisementDTO(advertisement.toDTO());
                 }
             } else {
                 log.error("User {} not authorized to match user for advertisement {}", userRequestId, advertisementId);
+            }
+        } else {
+            log.error("Advertisement {} not found", advertisementId);
+        }
+        return null;
+    }
+
+    public AdvertisementDTO candidateUser(HttpServletRequest request, String userId, String advertisementId) {
+        if(!StringUtils.hasLength(userId) || !StringUtils.hasLength(advertisementId)){
+            log.error("User id or advertisement id is null, check your request");
+            return null;
+        }
+        Optional<Advertisement> opt = advertisementRepository.findById(advertisementId);
+        if (opt.isPresent()) {
+            Advertisement advertisement = opt.get();
+            String userRequestId = firebaseService.getFirebaseToken(request).getUid();
+            if (userId.equals(userRequestId)) {
+                List<String> candidateUserList = advertisement.getCandidateUserList();
+                if (candidateUserList.contains(userId)) {
+                    log.error("Cannot candidate a user that is already in the candidate list");
+                } else {
+                    candidateUserList.add(userId);
+                    advertisement.setCandidateUserList(candidateUserList);
+                    log.info("Candidate user {} in advertisement {}", userId, advertisementId);
+                    advertisementRepository.save(advertisement);
+                    return finalizeAdvertisementDTO(advertisement.toDTO());
+                }
+            } else {
+                log.error("User {} not authorized to candidate other user for advertisement {}", userRequestId, advertisementId);
             }
         } else {
             log.error("Advertisement {} not found", advertisementId);
@@ -181,6 +216,7 @@ public class AdvertisementService {
         }
         return advertisementDTO;
     }
+
 
 
 }

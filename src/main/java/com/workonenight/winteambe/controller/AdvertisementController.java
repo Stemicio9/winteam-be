@@ -5,6 +5,8 @@ import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
 import com.workonenight.winteambe.dto.AdvertisementDTO;
 import com.workonenight.winteambe.dto.BaseUserDTO;
+import com.workonenight.winteambe.dto.CandidateAdvertisementRequest;
+import com.workonenight.winteambe.dto.MatchAdvertisementRequest;
 import com.workonenight.winteambe.service.AdvertisementService;
 import com.workonenight.winteambe.service.other.FilterBuilderService;
 import org.springframework.data.domain.Page;
@@ -142,9 +144,15 @@ public class AdvertisementController {
 
     @PostMapping(value = "/matched")
     public ResponseEntity<AdvertisementDTO> matchUser(HttpServletRequest request,
-                                                      @RequestParam("userId") String userId,
-                                                      @RequestParam("advertisementId") String advertisementId) {
-        AdvertisementDTO advertisementDTO = advertisementService.matchUser(request, userId, advertisementId);
+                                                      @RequestBody MatchAdvertisementRequest matchAdvertisementRequest) {
+        AdvertisementDTO advertisementDTO = advertisementService.matchUser(request, matchAdvertisementRequest.getUserId(), matchAdvertisementRequest.getAdvertisementId());
+        return new ResponseEntity<>(advertisementDTO, HttpStatus.OK);
+    }
+
+    @PostMapping(value = "/candidate")
+    public ResponseEntity<AdvertisementDTO> candidateUser(HttpServletRequest request,
+                                                      @RequestBody CandidateAdvertisementRequest candidateAdvertisementRequest) {
+        AdvertisementDTO advertisementDTO = advertisementService.candidateUser(request, candidateAdvertisementRequest.getUserId(), candidateAdvertisementRequest.getAdvertisementId());
         return new ResponseEntity<>(advertisementDTO, HttpStatus.OK);
     }
 

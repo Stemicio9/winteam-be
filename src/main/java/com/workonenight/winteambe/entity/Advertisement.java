@@ -31,7 +31,7 @@ public class Advertisement implements Serializable {
     public AdvertisementDTO toDTO() {
         AdvertisementDTO advertisementDTO = finalizeDTOProcess();
         advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatusDatore(this.date, this.matchedUserId));
-        return advertisementDTO;
+        return finalizeDTOProcess();
     }
 
     public AdvertisementDTO toDTOLavoratore(String currentUserId) {
