@@ -1,5 +1,6 @@
 package com.workonenight.winteambe.entity;
 
+import com.workonenight.winteambe.dto.SkillDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.utils.Utils;
 import lombok.Data;
@@ -11,6 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -92,7 +94,7 @@ public class User implements Serializable {
         this.roleId = userDTO.getRoleId();
         this.description = userDTO.getDescription();
         this.brief = userDTO.getBrief();
-        this.skillList = userDTO.getSkillIds();
+        this.skillList = userDTO.getSkillList().stream().map(SkillDTO::getId).collect(Collectors.toList());
         this.availabilityDays = userDTO.getAvailabilityDays();
         this.availabilityHourSlots = userDTO.getAvailabilityHourSlots();
         this.availabilityCities = userDTO.getAvailabilityCities();
