@@ -3,7 +3,6 @@ package com.workonenight.winteambe.service;
 import com.google.firebase.auth.FirebaseToken;
 import com.workonenight.winteambe.dto.AdvertisementDTO;
 import com.workonenight.winteambe.dto.BaseUserDTO;
-import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.entity.Advertisement;
 import com.workonenight.winteambe.repository.AdvertisementRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
@@ -55,7 +54,7 @@ public class AdvertisementService {
 
     public AdvertisementDTO createAdvertisement(HttpServletRequest request, AdvertisementDTO advertisementDTO) {
         log.info("Creating advertisement: '{}'", advertisementDTO.getTitle());
-        UserDTO userDTO = (UserDTO) userService.getMe(request);
+        BaseUserDTO userDTO = userService.getMe(request);
         if (userDTO != null) {
             Advertisement advertisement = advertisementDTO.toEntity();
             advertisement.setId(null);
@@ -142,6 +141,31 @@ public class AdvertisementService {
         return new ArrayList<>();
     }
 
+    public AdvertisementDTO matchUser(HttpServletRequest request, String userId, String advertisementId) {
+        Optional<Advertisement> opt = advertisementRepository.findById(advertisementId);
+        if (opt.isPresent()) {
+            Advertisement advertisement = opt.get();
+            String userRequestId = firebaseService.getFirebaseToken(request).getUid();
+            if (advertisement.getPublisherUserId().equals(userRequestId)) {
+                if (!advertisement.getCandidateUserList().contains(userId)) {
+                    log.error("Cannot match a user that is not in the candidate list");
+                } else {
+                    List<String> candidateUserList = advertisement.getCandidateUserList();
+                    candidateUserList.remove(userId);
+                    advertisement.setCandidateUserList(candidateUserList);
+                    advertisement.setMatchedUserId(userId);
+                    advertisementRepository.save(advertisement);
+                    return finalizeAdvertisementDTO(advertisement.toDTO());
+                }
+            } else {
+                log.error("User {} not authorized to match user for advertisement {}", userRequestId, advertisementId);
+            }
+        } else {
+            log.error("Advertisement {} not found", advertisementId);
+        }
+        return null;
+    }
+
 
     private AdvertisementDTO finalizeAdvertisementDTO(AdvertisementDTO advertisementDTO) {
         if (advertisementDTO.getSkillId() != null) {
@@ -157,4 +181,6 @@ public class AdvertisementService {
         }
         return advertisementDTO;
     }
+
+
 }

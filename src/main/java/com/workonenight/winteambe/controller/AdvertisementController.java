@@ -139,4 +139,13 @@ public class AdvertisementController {
         return new ResponseEntity<>(advertisementDTOList, HttpStatus.OK);
     }
 
+
+    @PostMapping(value = "/matched")
+    public ResponseEntity<AdvertisementDTO> matchUser(HttpServletRequest request,
+                                                      @RequestParam("userId") String userId,
+                                                      @RequestParam("advertisementId") String advertisementId) {
+        AdvertisementDTO advertisementDTO = advertisementService.matchUser(request, userId, advertisementId);
+        return new ResponseEntity<>(advertisementDTO, HttpStatus.OK);
+    }
+
 }
