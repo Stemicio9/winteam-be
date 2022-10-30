@@ -39,10 +39,20 @@ public class User implements Serializable {
     private String nation;
     private String phoneNumber;
     private String imageLink;
-    private int contatoreAnnunci;
-    //subscription id to join in the subscription collection
-    private String subscriptionId;
-    private LocalDateTime lastSubscriptionDate;
+
+
+
+    //subscription
+    private String subscriptionName;
+    private String subscriptionImageLink;
+    private int advertisementLeft;
+    private LocalDateTime expiringSubscriptionDate;
+    private boolean searchEnabled;
+    private boolean createAdvertisementEnabled;
+
+
+
+
     //company type id to join in the company type collection
     private List<String> companyTypeId;
     private boolean verified;
@@ -104,9 +114,15 @@ public class User implements Serializable {
         this.nation = userDTO.getNation();
         this.phoneNumber = userDTO.getPhoneNumber();
         this.imageLink = userDTO.getImageLink();
-        this.contatoreAnnunci = userDTO.getContatoreAnnunci();
-        this.subscriptionId = userDTO.getSubscriptionId();
-        this.lastSubscriptionDate = userDTO.getLastSubscriptionDate();
+
+        this.subscriptionName = userDTO.getSubscriptionName();
+        this.subscriptionImageLink = userDTO.getSubscriptionImageLink();
+        this.advertisementLeft = userDTO.getAdvertisementLeft();
+        this.expiringSubscriptionDate = userDTO.getExpiringSubscriptionDate();
+        this.searchEnabled = userDTO.isSearchEnabled();
+        this.createAdvertisementEnabled = userDTO.isCreateAdvertisementEnabled();
+
+
         this.companyTypeId = userDTO.getCompanyTypeId();
         this.verified = userDTO.isVerified();
         this.influencedUserList = userDTO.getInfluencedUserList();
@@ -121,9 +137,14 @@ public class User implements Serializable {
         userDTO.setAvailabilityHourSlots(this.availabilityHourSlots != null ? this.availabilityHourSlots : new ArrayList<>());
         userDTO.setAvailabilityCities(this.availabilityCities != null ? this.availabilityCities : new ArrayList<>());
         userDTO.setImageLink(this.imageLink);
-        userDTO.setContatoreAnnunci(this.contatoreAnnunci);
-        userDTO.setSubscriptionId(this.subscriptionId);
-        userDTO.setLastSubscriptionDate(this.lastSubscriptionDate);
+
+        userDTO.setSubscriptionName(this.subscriptionName);
+        userDTO.setSubscriptionImageLink(this.subscriptionImageLink);
+        userDTO.setAdvertisementLeft(this.advertisementLeft);
+        userDTO.setExpiringSubscriptionDate(this.expiringSubscriptionDate);
+        userDTO.setSearchEnabled(this.searchEnabled);
+        userDTO.setCreateAdvertisementEnabled(this.createAdvertisementEnabled);
+
         userDTO.setCompanyTypeId(this.companyTypeId);
         userDTO.setVerified(this.verified);
         userDTO.setInfluencedUserList(this.influencedUserList);

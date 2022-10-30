@@ -6,6 +6,7 @@ import com.workonenight.winteambe.common.PageResponse;
 import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.CanIDTO;
 import com.workonenight.winteambe.dto.UserDTO;
+import com.workonenight.winteambe.dto.response.SubscriptionResponse;
 import com.workonenight.winteambe.service.UserService;
 import com.workonenight.winteambe.service.other.FilterBuilderService;
 import org.springframework.data.domain.Page;
@@ -154,5 +155,10 @@ public class UserController {
     @GetMapping("/cani")
     public ResponseEntity<CanIDTO> canI(HttpServletRequest request, @RequestParam("what") String what) {
         return new ResponseEntity<>(userService.canI(request, what), HttpStatus.OK);
+    }
+
+    @GetMapping("/mysub")
+    public ResponseEntity<SubscriptionResponse> mySubscription(HttpServletRequest request) {
+        return new ResponseEntity<>(userService.mySubscription(request), HttpStatus.OK);
     }
 }

@@ -23,16 +23,21 @@ public class UserDTO extends BaseUserDTO {
     private List<String> availabilityDays;
     private List<String> availabilityHourSlots;
     private List<String> availabilityCities;
-    private int contatoreAnnunci;
-    //subscription id to join in the subscription collection
-    private String subscriptionId;
-    private LocalDateTime lastSubscriptionDate;
+
+
+    //subscription
+    private String subscriptionName;
+    private String subscriptionImageLink;
+    private int advertisementLeft;
+    private LocalDateTime expiringSubscriptionDate;
+    private boolean searchEnabled;
+    private boolean createAdvertisementEnabled;
+
+
     //company type id to join in the company type collection
     private List<String> companyTypeId;
     private boolean verified;
     private List<String> influencedUserList;
-
-    private boolean enabledAnnunci;
 
     public User toEntity(){
         User user = new User();
@@ -54,9 +59,15 @@ public class UserDTO extends BaseUserDTO {
         user.setNation(this.getNation());
         user.setPhoneNumber(this.getPhoneNumber());
         user.setImageLink(this.getImageLink());
-        user.setContatoreAnnunci(this.contatoreAnnunci);
-        user.setSubscriptionId(this.subscriptionId);
-        user.setLastSubscriptionDate(this.lastSubscriptionDate);
+
+        user.setSubscriptionName(this.subscriptionName);
+        user.setSubscriptionImageLink(this.subscriptionImageLink);
+        user.setAdvertisementLeft(this.advertisementLeft);
+        user.setExpiringSubscriptionDate(this.expiringSubscriptionDate);
+        user.setSearchEnabled(this.searchEnabled);
+        user.setCreateAdvertisementEnabled(this.createAdvertisementEnabled);
+
+
         user.setCompanyTypeId(this.companyTypeId);
         user.setVerified(this.verified);
         user.setInfluencedUserList(this.influencedUserList);

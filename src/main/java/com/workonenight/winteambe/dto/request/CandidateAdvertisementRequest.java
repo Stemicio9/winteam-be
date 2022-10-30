@@ -1,4 +1,4 @@
-package com.workonenight.winteambe.dto;
+package com.workonenight.winteambe.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

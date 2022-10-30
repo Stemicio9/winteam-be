@@ -2,6 +2,7 @@ package com.workonenight.winteambe.service;
 
 import com.google.firebase.auth.FirebaseToken;
 import com.workonenight.winteambe.dto.*;
+import com.workonenight.winteambe.dto.response.SubscriptionResponse;
 import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.repository.UserRepository;
 import com.workonenight.winteambe.service.other.FirebaseService;
@@ -98,7 +99,6 @@ public class UserService {
         return null;
     }
 
-    //TODO fix this method
     public Page<BaseUserDTO> getPageFiltered(HttpServletRequest request, Query query, Pageable pageable) {
         query.addCriteria(Criteria.where("id").ne(firebaseService.getMinimalUser(request).getId())).addCriteria(Criteria.where("roleId").ne(UserType.ADMIN));
         return hasUserSubscription(request) ?
@@ -118,19 +118,19 @@ public class UserService {
         if (firebaseToken != null) {
             log.info("Requested info for user: {}", firebaseToken.getUid());
             CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
-            String subscriptionId = userDTO.getSubscriptionId();
-            if (!StringUtils.hasLength(subscriptionId)) {
+            String subscriptionName = userDTO.getSubscriptionName();
+            if (!StringUtils.hasLength(subscriptionName)) {
+                //TODO controlliamo se l'utente ha un nome sub vuoto o null questo vuol dire che non ha ancora scelto una sottoscrizione
                 log.info("User {} has no subscription", userDTO.getEmail());
                 canIDTO.setResponse(false);
             } else {
-                SubscriptionDTO subscription = subscriptionService.getSubscriptionById(subscriptionId);
                 switch (what) {
                     case "search":
-                        log.info("Can user {} search? {}", userDTO.getEmail(), subscription.isSearchEnabled());
-                        canIDTO.setResponse(subscription.isSearchEnabled());
+                        log.info("Can user {} search? {}", userDTO.getEmail(), userDTO.isSearchEnabled());
+                        canIDTO.setResponse(userDTO.isSearchEnabled());
                         break;
                     case "createAdvertisement":
-                        boolean res = subscription.isCreateAdvertisementEnabled() && subscription.getNumAnnunci() > userDTO.getContatoreAnnunci();
+                        boolean res = userDTO.isCreateAdvertisementEnabled() && userDTO.getAdvertisementLeft() > 0;
                         log.info("Can user {} create advertisement? {}", userDTO.getEmail(), res);
                         canIDTO.setResponse(res);
                         break;
@@ -141,6 +141,21 @@ public class UserService {
                 }
             }
             return canIDTO;
+        }
+        log.error("Token not found in request");
+        return null;
+    }
+
+    public SubscriptionResponse mySubscription(HttpServletRequest request) {
+        FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
+        if (firebaseToken != null) {
+            log.info("Requested info for user: {}", firebaseToken.getUid());
+            CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
+            if (userDTO != null) {
+                log.info("User found: {}", userDTO);
+                return composeSubscriptionResponse(userDTO);
+            }
+            log.error("User not found for email: {}", firebaseToken.getEmail());
         }
         log.error("Token not found in request");
         return null;
@@ -193,12 +208,21 @@ public class UserService {
             CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
             if (userDTO != null) {
                 log.info("User found: {}", userDTO);
-                String subscriptionId = userDTO.getSubscriptionId();
-                return StringUtils.hasLength(subscriptionId) && subscriptionService.existsById(subscriptionId);
+                return StringUtils.hasLength(userDTO.getSubscriptionName());
             }
             log.error("User not found for email: {}", firebaseToken.getEmail());
         }
         log.error("Token not found in request");
         return false;
+    }
+
+    private SubscriptionResponse composeSubscriptionResponse(CompanyDTO userDTO) {
+        return new SubscriptionResponse(
+                userDTO.getSubscriptionName(),
+                userDTO.getImageLink(),
+                userDTO.getAdvertisementLeft(),
+                userDTO.getExpiringSubscriptionDate(),
+                userDTO.isSearchEnabled(),
+                userDTO.isCreateAdvertisementEnabled());
     }
 }

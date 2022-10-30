@@ -14,14 +14,17 @@ public class CompanyDTO extends BaseUserDTO{
 
     private String companyName;
 
-    private int contatoreAnnunci;
-    //subscription id to join in the subscription collection
-    private String subscriptionId;
-    private LocalDateTime lastSubscriptionDate;
+    //subscription
+    private String subscriptionName;
+    private String subscriptionImageLink;
+    private int advertisementLeft;
+    private LocalDateTime expiringSubscriptionDate;
+    private boolean searchEnabled;
+    private boolean createAdvertisementEnabled;
+
     //company type id to join in the company type collection
     private List<String> companyTypeId;
     private boolean verified;
-    private boolean enabledAnnunci;
 
     public static CompanyDTO fromUserDTOtoCompanyDTO(UserDTO userDTO){
         CompanyDTO companyDTO = new CompanyDTO();
@@ -37,12 +40,17 @@ public class CompanyDTO extends BaseUserDTO{
         companyDTO.setNation(userDTO.getNation());
         companyDTO.setPhoneNumber(userDTO.getPhoneNumber());
         companyDTO.setImageLink(userDTO.getImageLink());
-        companyDTO.setContatoreAnnunci(userDTO.getContatoreAnnunci());
-        companyDTO.setSubscriptionId(userDTO.getSubscriptionId());
-        companyDTO.setLastSubscriptionDate(userDTO.getLastSubscriptionDate());
+
+        companyDTO.setSubscriptionName(userDTO.getSubscriptionName());
+        companyDTO.setSubscriptionImageLink(userDTO.getSubscriptionImageLink());
+        companyDTO.setAdvertisementLeft(userDTO.getAdvertisementLeft());
+        companyDTO.setExpiringSubscriptionDate(userDTO.getExpiringSubscriptionDate());
+        companyDTO.setSearchEnabled(userDTO.isSearchEnabled());
+        companyDTO.setCreateAdvertisementEnabled(userDTO.isCreateAdvertisementEnabled());
+
+
         companyDTO.setCompanyTypeId(userDTO.getCompanyTypeId());
         companyDTO.setVerified(userDTO.isVerified());
-        companyDTO.setEnabledAnnunci(userDTO.isEnabledAnnunci());
         return companyDTO;
     }
 }
