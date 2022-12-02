@@ -1,18 +1,38 @@
-name: GitHub Actions Demo
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: [push]
+name: Action for Deploy
+
+on:
+  push:
+    branches:
+      - 'main'
+
 jobs:
-  Explore-GitHub-Actions:
+
+  artifact:
+
+    name: Test master branch - GitHub Packages
     runs-on: ubuntu-latest
     steps:
-      - run: echo "🎉 The job was automatically triggered by a ${{ github.event_name }} event."
-      - run: echo "🐧 This job is now running on a ${{ runner.os }} server hosted by GitHub!"
-      - run: echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ${{ github.repository }}."
-      - name: Check out repository code
-        uses: actions/checkout@v3
-      - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
-      - run: echo "🖥️ The workflow is now ready to test your code on the runner."
-      - name: List files in the repository
-        run: |
-          ls ${{ github.workspace }}
-      - run: echo "🍏 This job's status is ${{ job.status }}."
+     - uses: actions/checkout@v1
+     - name: Copy repository contents via scp
+       uses: appleboy/scp-action@master
+       env:
+        HOST: ${{ secrets.HOST }}
+        USERNAME: ${{ secrets.USERNAME }}
+        PORT: ${{ secrets.PORT }}
+        KEY: ${{ secrets.SSHKEY }}
+       with:
+        source: "."
+        target: "/var/www/mywebsite" #location that want to use as temporary folder to build project
+     - name: Build Project & Move Project to Tomcat Folder
+       uses: appleboy/ssh-action@master
+       with:
+         host: ${{ secrets.HOST }}
+         USERNAME: ${{ secrets.USERNAME }}
+         PORT: ${{ secrets.PORT }}
+         KEY: ${{ secrets.SSHKEY }}
+         script: |
+            pwd #probably we are in wrong directory here
+            mvn -B clean package -DskipTests
+            pwd
+            cd ~ #temporary folder 
+            mv . . #move content (war file) from temporary folder to tomcat location
