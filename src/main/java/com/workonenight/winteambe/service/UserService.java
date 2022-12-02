@@ -212,7 +212,7 @@ public class UserService {
             }
             log.error("User not found for email: {}", firebaseToken.getEmail());
         }
-        log.error("Token not found in request");
+        log.error("Token not found in request please update your app");
         return false;
     }
 
