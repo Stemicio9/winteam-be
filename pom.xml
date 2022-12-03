@@ -8,12 +8,15 @@
         <version>2.7.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>com.workonenight</groupId>
     <artifactId>winteam-be</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+
     <packaging>war</packaging>
+
     <name>winteam-be</name>
     <description>winteam-be</description>
+
     <properties>
         <java.version>11</java.version>
     </properties>
@@ -80,6 +83,7 @@
     </dependencies>
 
     <build>
+        <finalName>winserver</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
