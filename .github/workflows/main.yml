@@ -13,26 +13,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
      - uses: actions/checkout@v1
-     - name: Copy repository contents via scp
-       uses: appleboy/scp-action@master
-       env:
-        HOST: ${{ secrets.HOST }}
-        USERNAME: ${{ secrets.USERNAME }}
-        PORT: ${{ secrets.PORT }}
-        KEY: ${{ secrets.SSHKEY }}
+     - name: Set up JDK 11
+       uses: actions/setup-java@v1
        with:
-        source: "."
-        target: "/var/www/mywebsite" #location that want to use as temporary folder to build project
-     - name: Build Project & Move Project to Tomcat Folder
-       uses: appleboy/ssh-action@master
-       with:
-         host: ${{ secrets.HOST }}
-         USERNAME: ${{ secrets.USERNAME }}
-         PORT: ${{ secrets.PORT }}
-         KEY: ${{ secrets.SSHKEY }}
-         script: |
-            pwd #probably we are in wrong directory here
-            mvn -B clean package -DskipTests
-            pwd
-            cd ~ #temporary folder 
-            mv . . #move content (war file) from temporary folder to tomcat location
+         java-version: 11.0.4
+     - name: Maven Package
+       run: mvn -B clean package -DskipTests
+     - name: Maven Verify
+       run: mvn -B clean verify
