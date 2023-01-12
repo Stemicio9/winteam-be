@@ -10,7 +10,6 @@ import java.util.List;
 @Data
 public class AdvertisementDTO {
     private String id;
-    private String title;
     private String description;
     private String date;
     private String hourSlot;
@@ -20,9 +19,12 @@ public class AdvertisementDTO {
     private SkillDTO skillDTO;
 
     private Double payment;
+
+    private String position;
     private String publisherUserId;
     private BaseUserDTO publisherUserDTO;
     private List<String> candidateUserList;
+
     private String matchedUserId;
     private String advertisementStatus;
 
@@ -30,12 +32,12 @@ public class AdvertisementDTO {
     public Advertisement toEntity() {
         Advertisement advertisement = new Advertisement();
         advertisement.setId(this.id);
-        advertisement.setTitle(this.title);
         advertisement.setDescription(this.description);
         advertisement.setDate(LocalDateTime.parse(this.date));
         advertisement.setHourSlot(this.hourSlot);
         advertisement.setSkillId(this.skillId);
         advertisement.setPayment(this.payment);
+        advertisement.setPosition(this.position);
         advertisement.setPublisherUserId(this.publisherUserId);
         advertisement.setCandidateUserList((this.candidateUserList != null) ? this.candidateUserList : new ArrayList<>());
         advertisement.setMatchedUserId(this.matchedUserId);

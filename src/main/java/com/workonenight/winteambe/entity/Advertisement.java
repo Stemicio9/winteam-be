@@ -17,12 +17,13 @@ public class Advertisement implements Serializable {
 
     @Id
     private String id;
-    private String title;
     private String description;
     private LocalDateTime date;
     private String hourSlot;
     private String skillId;
     private Double payment;
+
+    private String position;
     private String publisherUserId;
     private List<String> candidateUserList;
     private String matchedUserId;
@@ -41,12 +42,12 @@ public class Advertisement implements Serializable {
     }
 
     public Advertisement toUpdateEntity(AdvertisementDTO advertisementDTO) {
-        this.title = advertisementDTO.getTitle();
         this.description = advertisementDTO.getDescription();
         this.date = LocalDateTime.parse(advertisementDTO.getDate());
         this.hourSlot = advertisementDTO.getHourSlot();
         this.skillId = advertisementDTO.getSkillId();
         this.payment = advertisementDTO.getPayment();
+        this.position = advertisementDTO.getPosition();
         this.publisherUserId = advertisementDTO.getPublisherUserId();
         this.candidateUserList = advertisementDTO.getCandidateUserList().size() == 0 ? new ArrayList<>() : advertisementDTO.getCandidateUserList();
         this.matchedUserId = advertisementDTO.getMatchedUserId();
@@ -56,12 +57,12 @@ public class Advertisement implements Serializable {
     private AdvertisementDTO finalizeDTOProcess(){
         AdvertisementDTO advertisementDTO = new AdvertisementDTO();
         advertisementDTO.setId(this.id);
-        advertisementDTO.setTitle(this.title);
         advertisementDTO.setDescription(this.description);
         advertisementDTO.setDate(this.date.format(Utils.DATE_TIME_FORMATTER));
         advertisementDTO.setHourSlot(this.hourSlot);
         advertisementDTO.setSkillId(this.skillId);
         advertisementDTO.setPayment(this.payment);
+        advertisementDTO.setPosition(this.position);
         advertisementDTO.setPublisherUserId(this.publisherUserId);
         advertisementDTO.setCandidateUserList(this.candidateUserList != null ? candidateUserList :  new ArrayList<>());
         advertisementDTO.setMatchedUserId(this.matchedUserId);

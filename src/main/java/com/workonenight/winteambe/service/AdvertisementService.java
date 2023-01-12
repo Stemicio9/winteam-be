@@ -54,7 +54,7 @@ public class AdvertisementService {
     }
 
     public AdvertisementDTO createAdvertisement(HttpServletRequest request, AdvertisementDTO advertisementDTO) {
-        log.info("Creating advertisement: '{}'", advertisementDTO.getTitle());
+        log.info("Creating advertisement");
         BaseUserDTO userDTO = userService.getMe(request);
         if (userDTO != null) {
             Advertisement advertisement = advertisementDTO.toEntity();
