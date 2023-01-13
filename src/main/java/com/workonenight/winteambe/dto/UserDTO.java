@@ -37,6 +37,7 @@ public class UserDTO extends BaseUserDTO {
     //company type id to join in the company type collection
     private List<String> companyTypeId;
     private boolean verified;
+    private double rating;
     private List<String> influencedUserList;
 
     public User toEntity(){
@@ -70,6 +71,7 @@ public class UserDTO extends BaseUserDTO {
 
         user.setCompanyTypeId(this.companyTypeId);
         user.setVerified(this.verified);
+        user.setRating(this.rating);
         user.setInfluencedUserList(this.influencedUserList);
         return user;
     }

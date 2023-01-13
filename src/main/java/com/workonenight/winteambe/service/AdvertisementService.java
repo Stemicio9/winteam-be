@@ -193,7 +193,8 @@ public class AdvertisementService {
             String userId = firebaseService.getFirebaseToken(request).getUid();
             List<String> candidateUserList = advertisement.getCandidateUserList();
             if (candidateUserList.contains(userId)) {
-                log.error("Cannot candidate a user that is already in the candidate list");
+                //remove user from candidate list if it is present
+                candidateUserList.remove(userId);
             } else {
                 candidateUserList.add(userId);
                 advertisement.setCandidateUserList(candidateUserList);

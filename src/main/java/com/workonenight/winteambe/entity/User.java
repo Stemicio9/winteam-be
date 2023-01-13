@@ -57,6 +57,8 @@ public class User implements Serializable {
     private List<String> companyTypeId;
     private boolean verified;
 
+    private double rating;
+
     private List<String> influencedUserList;
 
     public User(String id, String email) {
@@ -93,6 +95,7 @@ public class User implements Serializable {
         userDTO.setProvince(this.province);
         userDTO.setNation(this.nation);
         userDTO.setPhoneNumber(this.phoneNumber);
+        userDTO.setRating(this.rating);
         return finalizeDTOProcess(userDTO);
     }
 
@@ -126,6 +129,8 @@ public class User implements Serializable {
         this.companyTypeId = userDTO.getCompanyTypeId();
         this.verified = userDTO.isVerified();
         this.influencedUserList = userDTO.getInfluencedUserList();
+
+        this.rating = userDTO.getRating();
         return this;
     }
 
@@ -147,6 +152,7 @@ public class User implements Serializable {
 
         userDTO.setCompanyTypeId(this.companyTypeId);
         userDTO.setVerified(this.verified);
+        userDTO.setRating(this.rating);
         userDTO.setInfluencedUserList(this.influencedUserList);
         return userDTO;
     }

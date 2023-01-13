@@ -26,6 +26,8 @@ public class CompanyDTO extends BaseUserDTO{
     private List<String> companyTypeId;
     private boolean verified;
 
+    private double rating;
+
     public static CompanyDTO fromUserDTOtoCompanyDTO(UserDTO userDTO){
         CompanyDTO companyDTO = new CompanyDTO();
         companyDTO.setId(userDTO.getId());
@@ -51,6 +53,7 @@ public class CompanyDTO extends BaseUserDTO{
 
         companyDTO.setCompanyTypeId(userDTO.getCompanyTypeId());
         companyDTO.setVerified(userDTO.isVerified());
+        companyDTO.setRating(userDTO.getRating());
         return companyDTO;
     }
 }

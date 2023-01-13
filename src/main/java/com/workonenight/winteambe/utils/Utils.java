@@ -11,7 +11,7 @@ import java.time.temporal.ChronoUnit;
 @Slf4j
 public class Utils {
 
-    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM");
+    public static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     public static final String ANONYMOUS = "******";
 
     private Utils() {
