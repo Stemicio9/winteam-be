@@ -22,7 +22,10 @@ public class Utils {
     }
 
     public static void checkHourSlot(String hourSlot) {
-        if (!hourSlot.equalsIgnoreCase(Days.MATTINA) && !hourSlot.equalsIgnoreCase(Days.POMERIGGIO) && !hourSlot.equalsIgnoreCase(Days.SERA) && !hourSlot.equalsIgnoreCase(Days.NOTTE)) {
+        if (!hourSlot.equalsIgnoreCase(Days.MATTINA) &&
+            !hourSlot.equalsIgnoreCase(Days.POMERIGGIO) &&
+            !hourSlot.equalsIgnoreCase(Days.SERA) &&
+            !hourSlot.equalsIgnoreCase(Days.NOTTE)) {
             log.error("Hour slot not valid, must be MATTINA, POMERIGGIO, SERA or NOTTE ignoring case");
         }
     }
@@ -88,6 +91,5 @@ public class Utils {
         public static final String HISTORY = "history";
         public static final String IGNORED = "ignored";
     }
-
 
 }

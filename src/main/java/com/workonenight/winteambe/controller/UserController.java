@@ -5,6 +5,7 @@ import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
 import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.CanIDTO;
+import com.workonenight.winteambe.dto.LavoratoreDTO;
 import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.dto.response.SubscriptionResponse;
 import com.workonenight.winteambe.service.UserService;
@@ -137,6 +138,7 @@ public class UserController {
      */
     @GetMapping("/list/filter")
     public ResponseEntity<List<UserDTO>> getAllSearchCriteria(
+            HttpServletRequest request,
             @RequestParam(value = "filterOr", required = false) String filterOr,
             @RequestParam(value = "filterAnd", required = false) String filterAnd) {
 
@@ -146,7 +148,7 @@ public class UserController {
         List<FilterCondition> orConditions = filterBuilderService.createFilterCondition(filterOr);
 
         Query query = filterCriteriaBuilder.addCondition(andConditions, orConditions);
-        List<UserDTO> employees = userService.getAllFiltered(query);
+        List<UserDTO> employees = userService.getAllFiltered(request,query);
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
@@ -160,5 +162,10 @@ public class UserController {
     @GetMapping("/mysub")
     public ResponseEntity<SubscriptionResponse> mySubscription(HttpServletRequest request) {
         return new ResponseEntity<>(userService.mySubscription(request), HttpStatus.OK);
+    }
+
+    @GetMapping("/search/list")
+    public ResponseEntity<List<LavoratoreDTO>> searchUser(HttpServletRequest request, @RequestParam("search") String search) {
+        return new ResponseEntity<>(userService.searchUser(request, search), HttpStatus.OK);
     }
 }

@@ -41,7 +41,6 @@ public class User implements Serializable {
     private String imageLink;
 
 
-
     //subscription
     private String subscriptionName;
     private String subscriptionImageLink;
@@ -49,8 +48,6 @@ public class User implements Serializable {
     private LocalDateTime expiringSubscriptionDate;
     private boolean searchEnabled;
     private boolean createAdvertisementEnabled;
-
-
 
 
     //company type id to join in the company type collection
@@ -71,18 +68,20 @@ public class User implements Serializable {
         userDTO.setId(Utils.ANONYMOUS);
         userDTO.setLastName(Utils.ANONYMOUS);
         userDTO.setCompanyName(Utils.ANONYMOUS);
-        userDTO.setEmail(Utils.ANONYMOUS + this.email.split("@")[1]);
-        userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + " " + Utils.ANONYMOUS);
+        userDTO.setEmail(Utils.ANONYMOUS + '@' + this.email.split("@")[1]);
+        if (this.phoneNumber != null)
+            userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + " " + Utils.ANONYMOUS);
         userDTO.setDescription(Utils.ANONYMOUS);
         userDTO.setBrief(Utils.ANONYMOUS);
         userDTO.setAddress(Utils.ANONYMOUS);
         userDTO.setCity(Utils.ANONYMOUS);
         userDTO.setProvince(Utils.ANONYMOUS);
         userDTO.setNation(Utils.ANONYMOUS);
+        userDTO.setImageLink(Utils.ANONYMOUS);
         return finalizeDTOProcess(userDTO);
     }
 
-    public UserDTO toDTO(){
+    public UserDTO toDTO() {
         UserDTO userDTO = new UserDTO();
         userDTO.setId(this.id);
         userDTO.setLastName(this.lastName);
@@ -96,6 +95,7 @@ public class User implements Serializable {
         userDTO.setNation(this.nation);
         userDTO.setPhoneNumber(this.phoneNumber);
         userDTO.setRating(this.rating);
+        userDTO.setImageLink(this.imageLink);
         return finalizeDTOProcess(userDTO);
     }
 
@@ -134,14 +134,13 @@ public class User implements Serializable {
         return this;
     }
 
-    private UserDTO finalizeDTOProcess(UserDTO userDTO){
+    private UserDTO finalizeDTOProcess(UserDTO userDTO) {
         userDTO.setFirstName(this.firstName);
         userDTO.setRoleId(this.roleId);
         userDTO.setSkillIds(this.skillList);
         userDTO.setAvailabilityDays(this.availabilityDays != null ? this.availabilityDays : new ArrayList<>());
         userDTO.setAvailabilityHourSlots(this.availabilityHourSlots != null ? this.availabilityHourSlots : new ArrayList<>());
         userDTO.setAvailabilityCities(this.availabilityCities != null ? this.availabilityCities : new ArrayList<>());
-        userDTO.setImageLink(this.imageLink);
 
         userDTO.setSubscriptionName(this.subscriptionName);
         userDTO.setSubscriptionImageLink(this.subscriptionImageLink);

@@ -107,9 +107,11 @@ public class UserService {
 
     }
 
-    public List<UserDTO> getAllFiltered(Query query) {
+    public List<UserDTO> getAllFiltered(HttpServletRequest request, Query query) {
         log.info("Get all user filtered");
-        return userRepository.findAll(query).stream().map(User::toDTO).peek(this::finalizeUserDTO).collect(Collectors.toList());
+        return hasUserSubscription(request) ?
+                userRepository.findAll(query).stream().map(User::toDTO).peek(this::finalizeUserDTO).collect(Collectors.toList()) :
+                userRepository.findAll(query).stream().map(User::toDTOAnonymous).peek(this::finalizeUserDTO).collect(Collectors.toList());
     }
 
     public CanIDTO canI(HttpServletRequest request, String what) {
@@ -161,6 +163,29 @@ public class UserService {
         return null;
     }
 
+    public List<LavoratoreDTO> searchUser(HttpServletRequest request, String search) {
+        boolean hasSub = hasUserSubscription(request);
+        List<LavoratoreDTO> allUsers = getAllUserByRole(UserType.LAVORATORE, hasSub);
+        if (allUsers != null) {
+            if(StringUtils.hasLength(search)) {
+                return hasSub ?
+                        allUsers.stream()
+                                .filter(u -> u.getFirstName().toLowerCase().contains(search.toLowerCase()) || u.getLastName().toLowerCase().contains(search.toLowerCase()) || checkIfSkillMatch(u.getSkillList(), search))
+                                .collect(Collectors.toList()) :
+                        allUsers.stream()
+                                .filter(u -> u.getFirstName().toLowerCase().contains(search.toLowerCase()) || checkIfSkillMatch(u.getSkillList(), search))
+                                .collect(Collectors.toList());
+            } else {
+                return allUsers;
+            }
+        }else{
+            return new ArrayList<>();
+        }
+    }
+
+    private boolean checkIfSkillMatch(List<SkillDTO> skillList, String search) {
+        return skillList.stream().anyMatch(s -> s.getName().toLowerCase().contains(search.toLowerCase()));
+    }
 
     private BaseUserDTO finalizeUserDTO(UserDTO userDTO) {
         if (userDTO.getSkillIds() == null) {
@@ -224,5 +249,13 @@ public class UserService {
                 userDTO.getExpiringSubscriptionDate(),
                 userDTO.isSearchEnabled(),
                 userDTO.isCreateAdvertisementEnabled());
+    }
+
+
+    private List<LavoratoreDTO> getAllUserByRole(String role, boolean hasSub) {
+        log.info("Get all user");
+        return  hasSub?
+                userRepository.findAllByRoleId(role).stream().map(u -> (LavoratoreDTO) this.finalizeUserDTO(u.toDTO())).collect(Collectors.toList()) :
+                userRepository.findAllByRoleId(role).stream().map(u -> (LavoratoreDTO) this.finalizeUserDTO(u.toDTOAnonymous())).collect(Collectors.toList());
     }
 }

@@ -8,4 +8,6 @@ import java.util.List;
 public interface AdvertisementRepository extends ResourceRepository<Advertisement, String> {
 
     List<Advertisement> findAllByPublisherUserId(String publisherUserId);
+
+
 }

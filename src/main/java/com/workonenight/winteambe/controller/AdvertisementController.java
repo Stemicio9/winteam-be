@@ -50,6 +50,12 @@ public class AdvertisementController {
         return advertisementService.getAllUsersRelated(id);
     }
 
+    @GetMapping(value="/list/skill")
+    public ResponseEntity<List<AdvertisementDTO>> getAdvertisementBySkill(@RequestParam(name = "skill") String skill) {
+        List<AdvertisementDTO> advertisementDTOList = advertisementService.getAllAdvertisementsBySkill(skill);
+        return new ResponseEntity<>(advertisementDTOList, HttpStatus.OK);
+    }
+
     /**
      * Get advertisement by id
      * @param id Advertisement id
@@ -84,6 +90,30 @@ public class AdvertisementController {
     @GetMapping(value = "/list/owner")
     public List<AdvertisementDTO> getAdvertisementByOwnerAndState(HttpServletRequest request, @RequestParam("state") String state) {
         return advertisementService.getAdvertisementByOwnerAndState(request, state);
+    }
+
+    /**
+     * @param page      page number
+     * @param size      size count
+     * @param orders    string orders
+     * @return PageResponse<AdvertisementDTO>
+     */
+    @GetMapping(value = "/page/applicant")
+    public ResponseEntity<PageResponse<AdvertisementDTO>> getSearchCriteriaPageForApplicant(
+            HttpServletRequest request,
+            @RequestParam(value = "state", defaultValue = "all", required = false) String state,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "20") int size,
+            @RequestParam(value = "orders", required = false) String orders) {
+
+        PageResponse<AdvertisementDTO> response = new PageResponse<>();
+
+        Pageable pageable = filterBuilderService.getPageable(size, page, orders);
+
+        Page<AdvertisementDTO> pg = advertisementService.getAdvertisementApplicant(request, state, pageable);
+        response.setPageStats(pg, pg.getContent());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 

@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -62,8 +63,8 @@ public class AdvertisementService {
             Utils.checkHourSlot(advertisement.getHourSlot());
             advertisement.setPublisherUserId(userDTO.getId());
             advertisement.setCandidateUserList(new ArrayList<>());
-
             //saving and returning advertisementDTO with skillDTO and publisherUserDTO filled
+            log.info("Saving advertisement with id: {}", advertisement.getId());
             AdvertisementDTO result = advertisementRepository.save(advertisement).toDTO();
             return this.finalizeAdvertisementDTO(result);
         } else {
@@ -101,6 +102,23 @@ public class AdvertisementService {
         return List.of();
     }
 
+    public Page<AdvertisementDTO> getAdvertisementApplicant(HttpServletRequest request, String state, Pageable pageable) {
+        log.info("Entering method getAdvertisementApplicant");
+        BaseUserDTO user = userService.getUserById(firebaseService.getFirebaseToken(request).getUid());
+        String userId = user.getId();
+        Query query = new Query();
+        query.addCriteria(Criteria.where("candidateUserList").in(userId));
+        Page<AdvertisementDTO> pageLavoratore = advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
+
+        List<AdvertisementDTO> contentLavoratore = pageLavoratore.getContent();
+        contentLavoratore = getAdvertisementDTOS(state, contentLavoratore);
+        contentLavoratore.stream().filter(a -> a.getCandidateUserList().contains(userId)).collect(Collectors.toList());
+
+
+
+        return new PageImpl<>(contentLavoratore, pageable, pageLavoratore.getTotalElements());
+    }
+
     public Page<AdvertisementDTO> getPageFiltered(HttpServletRequest request, String state, Query query, Pageable pageable) {
         log.info("Entering method getPageFiltered");
         log.info("Query: {}", query);
@@ -109,24 +127,12 @@ public class AdvertisementService {
         String userId = user.getId();
         switch (userRole) {
             case UserType.DATORE:
-                Page<AdvertisementDTO> pageDatore = advertisementRepository.findAll(query, pageable).map(Advertisement::toDTO).map(this::finalizeAdvertisementDTO);
-                List<AdvertisementDTO> contentDatore = pageDatore.getContent().stream().filter(a -> a.getPublisherUserId().equals(userId)).collect(Collectors.toList());
-                return new PageImpl<>(contentDatore, pageable, pageDatore.getTotalElements());
+                query.addCriteria(Criteria.where("publisherUserId").is(userId));
+                return advertisementRepository.findAll(query, pageable).map(Advertisement::toDTO).map(this::finalizeAdvertisementDTO);
             case UserType.LAVORATORE:
                 Page<AdvertisementDTO> pageLavoratore = advertisementRepository.findAll(query, pageable).map(a -> a.toDTOLavoratore(userId)).map(this::finalizeAdvertisementDTO);
                 List<AdvertisementDTO> contentLavoratore = pageLavoratore.getContent();
-                if (Objects.equals(state, Utils.AdvertisementLavoratoreState.ALL)) {
-                    contentLavoratore = contentLavoratore.stream()
-                            .filter(a ->
-                                    !a.getAdvertisementStatus().equals(Utils.AdvertisementLavoratoreState.HISTORY) &&
-                                            !a.getAdvertisementStatus().equals(Utils.AdvertisementLavoratoreState.IGNORED))
-                            .collect(Collectors.toList());
-                } else {
-                    contentLavoratore = contentLavoratore.stream()
-                            .filter(a ->
-                                    a.getAdvertisementStatus().equals(state))
-                            .collect(Collectors.toList());
-                }
+                contentLavoratore = getAdvertisementDTOS(state, contentLavoratore);
                 return new PageImpl<>(contentLavoratore, pageable, pageLavoratore.getTotalElements());
             default:
                 log.error("User role not valid");
@@ -138,7 +144,6 @@ public class AdvertisementService {
         log.info("Get all advertisements filtered");
         return advertisementRepository.findAll(query).stream().map(Advertisement::toDTO).peek(this::finalizeAdvertisementDTO).collect(Collectors.toList());
     }
-
     public List<BaseUserDTO> getAllUsersRelated(String id) {
         Advertisement advertisement = advertisementRepository.findById(id).orElse(null);
         if (advertisement != null) {
@@ -151,7 +156,6 @@ public class AdvertisementService {
         }
         return new ArrayList<>();
     }
-
     public AdvertisementDTO matchUser(HttpServletRequest request, String userId, String advertisementId) {
         if (!StringUtils.hasLength(userId) || !StringUtils.hasLength(advertisementId)) {
             log.error("User id or advertisement id is null, check your request");
@@ -166,7 +170,7 @@ public class AdvertisementService {
                 if (!candidateUserList.contains(userId)) {
                     log.error("Cannot match a user that is not in the candidate list");
                 } else {
-                    candidateUserList.remove(userId);
+                    // candidateUserList.remove(userId);
                     advertisement.setCandidateUserList(candidateUserList);
                     advertisement.setMatchedUserId(userId);
                     log.info("Matched user {} with advertisement {}", userId, advertisementId);
@@ -181,7 +185,6 @@ public class AdvertisementService {
         }
         return null;
     }
-
     public AdvertisementDTO candidateUser(HttpServletRequest request, String advertisementId) {
         if (!StringUtils.hasLength(advertisementId)) {
             log.error("Advertisement id is null, check your request");
@@ -192,23 +195,42 @@ public class AdvertisementService {
             Advertisement advertisement = opt.get();
             String userId = firebaseService.getFirebaseToken(request).getUid();
             List<String> candidateUserList = advertisement.getCandidateUserList();
+            log.info("User list of advertisement {}: {}", advertisementId, candidateUserList);
+            log.info("Number of candidates: {}", candidateUserList.size());
             if (candidateUserList.contains(userId)) {
                 //remove user from candidate list if it is present
+                log.info("User {} already in candidate list, removing it", userId);
                 candidateUserList.remove(userId);
             } else {
-                candidateUserList.add(userId);
-                advertisement.setCandidateUserList(candidateUserList);
                 log.info("Candidate user {} in advertisement {}", userId, advertisementId);
-                advertisementRepository.save(advertisement);
-                return finalizeAdvertisementDTO(advertisement.toDTO());
+                candidateUserList.add(userId);
             }
+            advertisement.setCandidateUserList(candidateUserList);
+            advertisementRepository.save(advertisement);
+            return finalizeAdvertisementDTO(advertisement.toDTO());
         } else {
             log.error("Advertisement {} not found", advertisementId);
         }
         return null;
     }
-
-
+    public List<AdvertisementDTO> getAllAdvertisementsBySkill(String skillName) {
+        log.info("Get all advertisements by skill");
+        return getAllAdvertisements().stream().filter(a -> a.getSkillDTO().getName().equals(skillName)).collect(Collectors.toList());
+    }
+    private List<AdvertisementDTO> getAdvertisementDTOS(String state, List<AdvertisementDTO> contentLavoratore) {
+        if (Objects.equals(state, Utils.AdvertisementLavoratoreState.ALL)) {
+            contentLavoratore = contentLavoratore.stream()
+                    .filter(a ->
+                            !a.getAdvertisementStatus().equals(Utils.AdvertisementLavoratoreState.HISTORY) &&
+                                    !a.getAdvertisementStatus().equals(Utils.AdvertisementLavoratoreState.IGNORED))
+                    .collect(Collectors.toList());
+        } else {
+            contentLavoratore = contentLavoratore.stream()
+                    .filter(a -> a.getAdvertisementStatus().equals(state))
+                    .collect(Collectors.toList());
+        }
+        return contentLavoratore;
+    }
     private AdvertisementDTO finalizeAdvertisementDTO(AdvertisementDTO advertisementDTO) {
         if (advertisementDTO.getSkillId() != null) {
             advertisementDTO.setSkillDTO(skillService.getSkillById(advertisementDTO.getSkillId()));
