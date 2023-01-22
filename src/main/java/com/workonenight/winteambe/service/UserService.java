@@ -1,11 +1,16 @@
 package com.workonenight.winteambe.service;
 
-import com.google.firebase.auth.FirebaseToken;
-import com.workonenight.winteambe.dto.*;
+import com.workonenight.winteambe.dto.CanIDTO;
 import com.workonenight.winteambe.dto.response.SubscriptionResponse;
+import com.workonenight.winteambe.entity.Skill;
 import com.workonenight.winteambe.entity.User;
+import com.workonenight.winteambe.enums.FirebaseRequestElement;
+import com.workonenight.winteambe.exception.RegistrationGenericErrorException;
+import com.workonenight.winteambe.exception.UserAlreadyExistsException;
+import com.workonenight.winteambe.exception.UserEmailNotFoundException;
+import com.workonenight.winteambe.exception.UserNotAuthenticatedException;
+import com.workonenight.winteambe.repository.SkillRepository;
 import com.workonenight.winteambe.repository.UserRepository;
-import com.workonenight.winteambe.service.other.FirebaseService;
 import com.workonenight.winteambe.utils.UserType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -13,220 +18,158 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static com.workonenight.winteambe.utils.Utils.composeSubscriptionResponse;
 
 @Service
 @Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
-    private final FirebaseService firebaseService;
-    private final SubscriptionService subscriptionService;
-    private final SkillService skillService;
 
-    public UserService(UserRepository userRepository, FirebaseService firebaseService, SubscriptionService subscriptionService, SkillService skillService) {
+    private final AuthenticationService authenticationService;
+
+    private final UserPermissionService userPermissionService;
+
+    private final SkillRepository skillRepository;
+
+
+    public UserService(UserRepository userRepository, AuthenticationService authenticationService, UserPermissionService userPermissionService, SkillRepository skillRepository) {
         this.userRepository = userRepository;
-        this.firebaseService = firebaseService;
-        this.subscriptionService = subscriptionService;
-        this.skillService = skillService;
+        this.authenticationService = authenticationService;
+        this.userPermissionService = userPermissionService;
+        this.skillRepository = skillRepository;
     }
 
-    public List<BaseUserDTO> getAllUser(HttpServletRequest request) {
-        log.info("Get all user");
-        return hasUserSubscription(request) ?
-                userRepository.findAll().stream().map(u -> this.finalizeUserDTO(u.toDTO())).collect(Collectors.toList()) :
-                userRepository.findAll().stream().map(u -> this.finalizeUserDTO(u.toDTOAnonymous())).collect(Collectors.toList());
+
+    // This method is used to retrieve all users from db
+    public List<User> findAllUsers() {
+        return userRepository.findAll();
     }
 
-    public BaseUserDTO getUserById(String id) {
-        log.info("Searching user for id: {}", id);
-        Optional<User> opt = userRepository.findById(id);
-        return opt.map(u -> this.finalizeUserDTO(u.toDTO())).orElse(null);
+    // todo add exception User not found, throw in signature and catch in controller returning correct error message and status
+    public User findUserById(String id) throws RuntimeException {
+        return userRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public BaseUserDTO createUser(UserDTO userDTO) {
-        log.info("Creating user: " + userDTO.getEmail());
-        User user = userDTO.toEntity();
-        UserDTO result = userRepository.save(user).toDTO();
-        return finalizeUserDTO(result);
+    // Save user receives the user as it needs to be saved in DB
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
 
-    public BaseUserDTO updateUser(UserDTO userDTO) {
-        log.info("Updating user: " + userDTO.getEmail());
-        User user = userRepository.findById(userDTO.getId()).orElse(null);
+
+    public User createUser(User user) {
+        log.info("Creating user: " + user.getEmail());
+        return userRepository.save(user);
+    }
+
+    public User updateUser(User user) {
+        log.info("Updating user: " + user.getEmail());
         if (user != null) {
-            user = user.toUpdateEntity(userDTO);
-            UserDTO updatedUser = userRepository.save(user).toDTO();
-            return finalizeUserDTO(updatedUser);
+            return userRepository.save(user);
         }
         return null;
     }
 
-    public BaseUserDTO getMe(HttpServletRequest request) {
-        FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
-        if (firebaseToken != null) {
-            log.info("Requested info for user: {}", firebaseToken.getUid());
-            BaseUserDTO userDTO = getUserById(firebaseToken.getUid());
-            if (userDTO != null) {
-                log.info("User found: {}", userDTO);
-                return userDTO;
-            }
-            log.error("User not found for email: {}", firebaseToken.getEmail());
-        }
-        log.error("Token not found in request");
-        return null;
-    }
 
-    public BaseUserDTO registerUser(HttpServletRequest request, String role) {
-        User user = firebaseService.getMinimalUser(request);
+    public User registerUser(HttpServletRequest request, String role) throws UserAlreadyExistsException, RegistrationGenericErrorException {
+        User user = authenticationService.getMinimalUser(request);
         if (user != null) {
             if (existUserByEmail(user.getEmail())) {
                 log.error("User already exist: {}", user.getEmail());
-                return null;
+                throw new UserAlreadyExistsException();
             }
             user.setRoleId(UserType.isRole(role) ? role : UserType.LAVORATORE);
             log.info("Registering user: " + user.getEmail());
-            UserDTO result = userRepository.save(user).toDTO();
-            return finalizeUserDTO(result);
+            return userRepository.save(user);
+
         }
         log.error("Error during user registration");
-        return null;
+        throw new RegistrationGenericErrorException();
     }
 
-    public Page<BaseUserDTO> getPageFiltered(HttpServletRequest request, Query query, Pageable pageable) {
-        query.addCriteria(Criteria.where("id").ne(firebaseService.getMinimalUser(request).getId())).addCriteria(Criteria.where("roleId").ne(UserType.ADMIN));
-        return hasUserSubscription(request) ?
-                userRepository.findAll(query, pageable).map(u -> this.finalizeUserDTO(u.toDTO())) :
-                userRepository.findAll(query, pageable).map(u -> this.finalizeUserDTO(u.toDTOAnonymous()));
 
+
+
+    public Page<User> getPageFiltered(HttpServletRequest request, Query query, Pageable pageable) {
+        String myId = authenticationService.myInfo(request, FirebaseRequestElement.ID);
+        query.addCriteria(Criteria.where("id").ne(myId)).addCriteria(Criteria.where("roleId").ne(UserType.ADMIN));
+        return getAllFiltered(query, pageable);
     }
 
-    public List<UserDTO> getAllFiltered(HttpServletRequest request, Query query) {
+    public Page<User> getAllFiltered(Query query, Pageable pageable) {
         log.info("Get all user filtered");
-        return hasUserSubscription(request) ?
-                userRepository.findAll(query).stream().map(User::toDTO).peek(this::finalizeUserDTO).collect(Collectors.toList()) :
-                userRepository.findAll(query).stream().map(User::toDTOAnonymous).peek(this::finalizeUserDTO).collect(Collectors.toList());
+        return userRepository.findAll(query, pageable);
     }
 
-    public CanIDTO canI(HttpServletRequest request, String what) {
-        FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
+    public CanIDTO canI(HttpServletRequest request, String what) throws UserNotAuthenticatedException {
+        String myId = authenticationService.myInfo(request, FirebaseRequestElement.ID);
         CanIDTO canIDTO = new CanIDTO();
-        if (firebaseToken != null) {
-            log.info("Requested info for user: {}", firebaseToken.getUid());
-            CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
-            String subscriptionName = userDTO.getSubscriptionName();
-            if (!StringUtils.hasLength(subscriptionName)) {
-                //TODO controlliamo se l'utente ha un nome sub vuoto o null questo vuol dire che non ha ancora scelto una sottoscrizione
-                log.info("User {} has no subscription", userDTO.getEmail());
-                canIDTO.setResponse(false);
-            } else {
-                switch (what) {
-                    case "search":
-                        log.info("Can user {} search? {}", userDTO.getEmail(), userDTO.isSearchEnabled());
-                        canIDTO.setResponse(userDTO.isSearchEnabled());
-                        break;
-                    case "createAdvertisement":
-                        boolean res = userDTO.isCreateAdvertisementEnabled() && userDTO.getAdvertisementLeft() > 0;
-                        log.info("Can user {} create advertisement? {}", userDTO.getEmail(), res);
-                        canIDTO.setResponse(res);
-                        break;
-                    default:
-                        log.error("Unknown what: {}", what);
-                        canIDTO.setResponse(false);
-                        break;
-                }
-            }
-            return canIDTO;
-        }
-        log.error("Token not found in request");
-        return null;
-    }
 
-    public SubscriptionResponse mySubscription(HttpServletRequest request) {
-        FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
-        if (firebaseToken != null) {
-            log.info("Requested info for user: {}", firebaseToken.getUid());
-            CompanyDTO userDTO = (CompanyDTO) getUserById(firebaseToken.getUid());
-            if (userDTO != null) {
-                log.info("User found: {}", userDTO);
-                return composeSubscriptionResponse(userDTO);
-            }
-            log.error("User not found for email: {}", firebaseToken.getEmail());
-        }
-        log.error("Token not found in request");
-        return null;
-    }
+        log.info("Requested info for user: {}", myId);
+        User userDTO = findUserById(myId);
 
-    public List<LavoratoreDTO> searchUser(HttpServletRequest request, String search) {
-        boolean hasSub = hasUserSubscription(request);
-        List<LavoratoreDTO> allUsers = getAllUserByRole(UserType.LAVORATORE, hasSub);
-        if (allUsers != null) {
-            if(StringUtils.hasLength(search)) {
-                return hasSub ?
-                        allUsers.stream()
-                                .filter(u -> u.getFirstName().toLowerCase().contains(search.toLowerCase()) || u.getLastName().toLowerCase().contains(search.toLowerCase()) || checkIfSkillMatch(u.getSkillList(), search))
-                                .collect(Collectors.toList()) :
-                        allUsers.stream()
-                                .filter(u -> u.getFirstName().toLowerCase().contains(search.toLowerCase()) || checkIfSkillMatch(u.getSkillList(), search))
-                                .collect(Collectors.toList());
-            } else {
-                return allUsers;
-            }
-        }else{
-            return new ArrayList<>();
-        }
-    }
-
-    private boolean checkIfSkillMatch(List<SkillDTO> skillList, String search) {
-        return skillList.stream().anyMatch(s -> s.getName().toLowerCase().contains(search.toLowerCase()));
-    }
-
-    private BaseUserDTO finalizeUserDTO(UserDTO userDTO) {
-        if (userDTO.getSkillIds() == null) {
-            userDTO.setSkillIds(new ArrayList<>());
-            userDTO.setSkillList(new ArrayList<>());
+        if (!userPermissionService.hasUserSubscription(userDTO)) {
+            //TODO controlliamo se l'utente ha un nome sub vuoto o null questo vuol dire che non ha ancora scelto una sottoscrizione
+            log.info("User {} has no subscription", userDTO.getEmail());
+            canIDTO.setResponse(false);
         } else {
-            List<SkillDTO> skillList = generateSkillDTOList(userDTO.getSkillIds());
-            userDTO.setSkillList(skillList);
-        }
-        return mapUserByRole(userDTO);
-    }
-
-    private BaseUserDTO mapUserByRole(UserDTO userDTO) {
-        switch (userDTO.getRoleId()) {
-            case UserType.LAVORATORE:
-            case UserType.ADMIN:
-                return LavoratoreDTO.fromUserDTOtoLavoratoreDTO(userDTO);
-            case UserType.DATORE:
-                return CompanyDTO.fromUserDTOtoCompanyDTO(userDTO);
-            default:
-                log.error("Unknown role: {}", userDTO.getRoleId());
-                return null;
-        }
-    }
-
-    private List<SkillDTO> generateSkillDTOList(List<String> skillIds) {
-        List<SkillDTO> res = new ArrayList<>();
-        for (String id : skillIds) {
-            SkillDTO skillDTO = skillService.getSkillById(id);
-            if (skillDTO != null) {
-                res.add(skillDTO);
+            switch (what) {
+                case "search":
+                    log.info("Can user {} search? {}", userDTO.getEmail(), userDTO.isSearchEnabled());
+                    canIDTO.setResponse(userDTO.isSearchEnabled());
+                    break;
+                case "createAdvertisement":
+                    boolean res = userDTO.isCreateAdvertisementEnabled() && userDTO.getAdvertisementLeft() > 0;
+                    log.info("Can user {} create advertisement? {}", userDTO.getEmail(), res);
+                    canIDTO.setResponse(res);
+                    break;
+                default:
+                    log.error("Unknown what: {}", what);
+                    canIDTO.setResponse(false);
+                    break;
             }
         }
-        return res;
+        return canIDTO;
     }
+
+    public SubscriptionResponse mySubscription(HttpServletRequest request) throws UserNotAuthenticatedException {
+        String myId = authenticationService.myInfo(request, FirebaseRequestElement.ID);
+
+        log.info("Requested info for user: {}", myId);
+        User userDTO = findUserById(myId);
+        if (userDTO != null) {
+            log.info("User found: {}", userDTO);
+            return composeSubscriptionResponse(userDTO);
+        }
+        log.error("User not found for email: {}", myId);
+
+        log.error("Token not found in request");
+        throw new UserNotAuthenticatedException();
+    }
+
+    public Page<User> searchUser(String search, Pageable pageable) {
+        log.info("Searching user with skill contains param: {}", search);
+        Optional<Skill> skill = skillRepository.findByName(search);
+        String skillSearch = "";
+        if(skill.isPresent()){
+            skillSearch = skill.get().getId();
+        }
+        return userRepository.findAllByRoleIdAndFirstNameContainsOrRoleIdAndLastNameContainsOrRoleIdAndSkillList_Id(UserType.LAVORATORE,
+                search, UserType.LAVORATORE, search, UserType.LAVORATORE, skillSearch, pageable);
+    }
+
+
 
     private boolean existUserByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
 
-    private boolean hasUserSubscription(HttpServletRequest request) {
+/*    public boolean hasUserSubscription(HttpServletRequest request) {
         FirebaseToken firebaseToken = firebaseService.getFirebaseToken(request);
         if (firebaseToken != null) {
             log.info("Requested info for user: {}", firebaseToken.getUid());
@@ -239,23 +182,17 @@ public class UserService {
         }
         log.error("Token not found in request please update your app");
         return false;
+    } */
+
+    public User getMe(HttpServletRequest request) throws UserNotAuthenticatedException, UserEmailNotFoundException {
+        String id = authenticationService.myInfo(request, FirebaseRequestElement.ID);
+        Optional<User> userDTO = userRepository.findById((id));
+        if (userDTO.isPresent()) {
+            log.info("User found: {}", userDTO);
+            return userDTO.get();
+        }
+        log.error("User not found for email: {}", authenticationService.myInfo(request, FirebaseRequestElement.EMAIL));
+        throw new UserEmailNotFoundException();
     }
 
-    private SubscriptionResponse composeSubscriptionResponse(CompanyDTO userDTO) {
-        return new SubscriptionResponse(
-                userDTO.getSubscriptionName(),
-                userDTO.getImageLink(),
-                userDTO.getAdvertisementLeft(),
-                userDTO.getExpiringSubscriptionDate(),
-                userDTO.isSearchEnabled(),
-                userDTO.isCreateAdvertisementEnabled());
-    }
-
-
-    private List<LavoratoreDTO> getAllUserByRole(String role, boolean hasSub) {
-        log.info("Get all user");
-        return  hasSub?
-                userRepository.findAllByRoleId(role).stream().map(u -> (LavoratoreDTO) this.finalizeUserDTO(u.toDTO())).collect(Collectors.toList()) :
-                userRepository.findAllByRoleId(role).stream().map(u -> (LavoratoreDTO) this.finalizeUserDTO(u.toDTOAnonymous())).collect(Collectors.toList());
-    }
 }

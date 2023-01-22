@@ -5,12 +5,13 @@ import com.workonenight.winteambe.common.GenericFilterCriteriaBuilder;
 import com.workonenight.winteambe.common.PageResponse;
 import com.workonenight.winteambe.dto.BaseUserDTO;
 import com.workonenight.winteambe.dto.CanIDTO;
-import com.workonenight.winteambe.dto.LavoratoreDTO;
-import com.workonenight.winteambe.dto.UserDTO;
 import com.workonenight.winteambe.dto.response.SubscriptionResponse;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
 import com.workonenight.winteambe.service.UserService;
 import com.workonenight.winteambe.service.other.FilterBuilderService;
+import com.workonenight.winteambe.utils.Utils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(value = "/user")
@@ -38,8 +40,13 @@ public class UserController {
      * @return List<BaseUserDTO>
      */
     @GetMapping(value = "/list/all")
-    public List<BaseUserDTO> getAllUser(HttpServletRequest request) {
-        return userService.getAllUser(request);
+    public List<DataTransferObject> getAllUser() {
+        try {
+            return userService.findAllUsers().stream().map(Utils::toDto).collect(Collectors.toList());
+        } catch (Exception e) {
+            // for now we catch generic exception
+            return null;
+        }
     }
 
     /**
@@ -49,8 +56,8 @@ public class UserController {
      * @return BaseUserDTO
      */
     @GetMapping(value = "/list/{id}")
-    public BaseUserDTO getUserById(@PathVariable("id") String id) {
-        return userService.getUserById(id);
+    public DataTransferObject getUserById(@PathVariable("id") String id) {
+        return Utils.toDto(userService.findUserById(id));
     }
 
     /**
@@ -60,8 +67,8 @@ public class UserController {
      * @return UserDTO
      */
     @PostMapping(value = "/create")
-    public BaseUserDTO createUser(@RequestBody UserDTO userDTO) {
-        return userService.createUser(userDTO);
+    public DataTransferObject createUser(@RequestBody BaseUserDTO userDTO) {
+        return Utils.toDto(userService.createUser(userDTO.toEntity()));
     }
 
     /**
@@ -71,8 +78,8 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping(value = "/register")
-    public BaseUserDTO registerUser(HttpServletRequest request, @RequestParam("role") String role) {
-        return userService.registerUser(request, role);
+    public DataTransferObject registerUser(HttpServletRequest request, @RequestParam("role") String role) {
+        return Utils.toDto(userService.registerUser(request, role));
     }
 
     /**
@@ -82,8 +89,8 @@ public class UserController {
      * @return UserDTO
      */
     @PostMapping(value = "/update")
-    public BaseUserDTO updateUser(@RequestBody UserDTO userDTO) {
-        return userService.updateUser(userDTO);
+    public DataTransferObject updateUser(@RequestBody BaseUserDTO userDTO) {
+        return Utils.toDto(userService.updateUser(userDTO.toEntity()));
     }
 
     /**
@@ -93,8 +100,8 @@ public class UserController {
      * @return UserDTO
      */
     @GetMapping(value = "/me")
-    public BaseUserDTO getMe(HttpServletRequest request) {
-        return userService.getMe(request);
+    public DataTransferObject getMe(HttpServletRequest request) {
+        return Utils.toDto(userService.getMe(request), false);
     }
 
 
@@ -107,7 +114,7 @@ public class UserController {
      * @return PageResponse<UserDTO>
      */
     @GetMapping(value = "/page")
-    public ResponseEntity<PageResponse<BaseUserDTO>> getSearchCriteriaPage(
+    public ResponseEntity<PageResponse<DataTransferObject>> getSearchCriteriaPage(
             HttpServletRequest request,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
@@ -115,7 +122,7 @@ public class UserController {
             @RequestParam(value = "filterAnd", required = false) String filterAnd,
             @RequestParam(value = "orders", required = false) String orders) {
 
-        PageResponse<BaseUserDTO> response = new PageResponse<>();
+        PageResponse<DataTransferObject> response = new PageResponse<>();
 
         Pageable pageable = filterBuilderService.getPageable(size, page, orders);
         GenericFilterCriteriaBuilder filterCriteriaBuilder = new GenericFilterCriteriaBuilder();
@@ -125,7 +132,7 @@ public class UserController {
         List<FilterCondition> orConditions = filterBuilderService.createFilterCondition(filterOr);
 
         Query query = filterCriteriaBuilder.addCondition(andConditions, orConditions);
-        Page<BaseUserDTO> pg = userService.getPageFiltered(request, query, pageable);
+        Page<DataTransferObject> pg = userService.getPageFiltered(request, query, pageable).map(Utils::toDto);
         response.setPageStats(pg, pg.getContent());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
@@ -137,7 +144,7 @@ public class UserController {
      * @return list of UserDTO
      */
     @GetMapping("/list/filter")
-    public ResponseEntity<List<UserDTO>> getAllSearchCriteria(
+    public ResponseEntity<List<DataTransferObject>> getAllSearchCriteria(
             HttpServletRequest request,
             @RequestParam(value = "filterOr", required = false) String filterOr,
             @RequestParam(value = "filterAnd", required = false) String filterAnd) {
@@ -148,7 +155,7 @@ public class UserController {
         List<FilterCondition> orConditions = filterBuilderService.createFilterCondition(filterOr);
 
         Query query = filterCriteriaBuilder.addCondition(andConditions, orConditions);
-        List<UserDTO> employees = userService.getAllFiltered(request,query);
+        List<DataTransferObject> employees = userService.getAllFiltered(query, Pageable.ofSize(1000)).getContent().stream().map(Utils::toDto).collect(Collectors.toList());
 
         return new ResponseEntity<>(employees, HttpStatus.OK);
     }
@@ -165,7 +172,10 @@ public class UserController {
     }
 
     @GetMapping("/search/list")
-    public ResponseEntity<List<LavoratoreDTO>> searchUser(HttpServletRequest request, @RequestParam("search") String search) {
-        return new ResponseEntity<>(userService.searchUser(request, search), HttpStatus.OK);
+    public ResponseEntity<Page<DataTransferObject>> searchUser(@RequestParam(value = "page", defaultValue = "0") int page,
+                                                   @RequestParam(value = "size", defaultValue = "20") int size,
+                                                   @RequestParam("search") String search) {
+        Pageable pageable = PageRequest.of(page, size);
+        return new ResponseEntity<>(Utils.convertPage(userService.searchUser(search, pageable)), HttpStatus.OK);
     }
 }

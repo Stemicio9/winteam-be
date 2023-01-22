@@ -1,9 +1,11 @@
 package com.workonenight.winteambe.entity;
 
 import com.workonenight.winteambe.dto.AdvertisementDTO;
-import com.workonenight.winteambe.utils.Utils;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
+import com.workonenight.winteambe.entity.interfaces.Transferrable;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
@@ -13,59 +15,32 @@ import java.util.List;
 
 @Data
 @Document(collection = "advertisements")
-public class Advertisement implements Serializable {
+public class Advertisement extends DataTransferObject implements Serializable, Transferrable {
 
     @Id
     private String id;
     private String description;
     private LocalDateTime date;
     private String hourSlot;
-    private String skillId;
+    @DBRef
+    private Skill skill;
     private Double payment;
-
     private String position;
-    private String publisherUserId;
-    private List<String> candidateUserList;
-    private String matchedUserId;
+    @DBRef
+    private User publisherUser;
+    @DBRef
+    private List<User> candidateUserList = new ArrayList<>();
+    @DBRef
+    private User matchedUser;
 
-    //convert entity to DTO
-    public AdvertisementDTO toDTO() {
-        AdvertisementDTO advertisementDTO = finalizeDTOProcess();
-        advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatusDatore(this.date, this.matchedUserId));
-        return advertisementDTO;
+
+    @Override
+    public DataTransferObject asDTO() {
+        return new AdvertisementDTO();
     }
 
-    public AdvertisementDTO toDTOLavoratore(String currentUserId) {
-        AdvertisementDTO advertisementDTO = finalizeDTOProcess();
-        advertisementDTO.setAdvertisementStatus(Utils.calculateAdvertisementStatusLavoratore(advertisementDTO, this.date, currentUserId, this.matchedUserId));
-        return advertisementDTO;
-    }
-
-    public Advertisement toUpdateEntity(AdvertisementDTO advertisementDTO) {
-        this.description = advertisementDTO.getDescription();
-        this.date = LocalDateTime.parse(advertisementDTO.getDate());
-        this.hourSlot = advertisementDTO.getHourSlot();
-        this.skillId = advertisementDTO.getSkillId();
-        this.payment = advertisementDTO.getPayment();
-        this.position = advertisementDTO.getPosition();
-        this.publisherUserId = advertisementDTO.getPublisherUserId();
-        this.candidateUserList = advertisementDTO.getCandidateUserList().size() == 0 ? new ArrayList<>() : advertisementDTO.getCandidateUserList();
-        this.matchedUserId = advertisementDTO.getMatchedUserId();
-        return this;
-    }
-
-    private AdvertisementDTO finalizeDTOProcess(){
-        AdvertisementDTO advertisementDTO = new AdvertisementDTO();
-        advertisementDTO.setId(this.id);
-        advertisementDTO.setDescription(this.description);
-        advertisementDTO.setDate(this.date.format(Utils.DATE_TIME_FORMATTER));
-        advertisementDTO.setHourSlot(this.hourSlot);
-        advertisementDTO.setSkillId(this.skillId);
-        advertisementDTO.setPayment(this.payment);
-        advertisementDTO.setPosition(this.position);
-        advertisementDTO.setPublisherUserId(this.publisherUserId);
-        advertisementDTO.setCandidateUserList(this.candidateUserList != null ? candidateUserList :  new ArrayList<>());
-        advertisementDTO.setMatchedUserId(this.matchedUserId);
-        return advertisementDTO;
+    @Override
+    public DataTransferObject createBaseDTO() {
+        return new Advertisement();
     }
 }

@@ -1,23 +1,25 @@
 package com.workonenight.winteambe.entity;
 
-import com.workonenight.winteambe.dto.SkillDTO;
-import com.workonenight.winteambe.dto.UserDTO;
-import com.workonenight.winteambe.utils.Utils;
+import com.workonenight.winteambe.dto.BaseUserDTO;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
+import com.workonenight.winteambe.entity.interfaces.Transferrable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
 @Document(collection = "users")
-public class User implements Serializable {
+public class User extends DataTransferObject implements Serializable, Transferrable {
 
     @Id
     private String id;
@@ -29,7 +31,9 @@ public class User implements Serializable {
     private String roleId;
     private String description;
     private String brief;
-    private List<String> skillList;
+
+    @DBRef
+    private List<Skill> skillList = new ArrayList<>();
     private List<String> availabilityDays;
     private List<String> availabilityHourSlots;
     private List<String> availabilityCities;
@@ -63,98 +67,29 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public UserDTO toDTOAnonymous() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(Utils.ANONYMOUS);
-        userDTO.setLastName(Utils.ANONYMOUS);
-        userDTO.setCompanyName(Utils.ANONYMOUS);
-        userDTO.setEmail(Utils.ANONYMOUS + '@' + this.email.split("@")[1]);
-        if (this.phoneNumber != null)
-            userDTO.setPhoneNumber(this.phoneNumber.substring(0, 3) + " " + Utils.ANONYMOUS);
-        userDTO.setDescription(Utils.ANONYMOUS);
-        userDTO.setBrief(Utils.ANONYMOUS);
-        userDTO.setAddress(Utils.ANONYMOUS);
-        userDTO.setCity(Utils.ANONYMOUS);
-        userDTO.setProvince(Utils.ANONYMOUS);
-        userDTO.setNation(Utils.ANONYMOUS);
-        userDTO.setImageLink(Utils.ANONYMOUS);
-        return finalizeDTOProcess(userDTO);
+    public boolean shouldBeAnonymized() {
+        return StringUtils.hasLength(this.getSubscriptionName());
+    }
+    @Override
+    public DataTransferObject asDTO() {
+        return new BaseUserDTO();
     }
 
-    public UserDTO toDTO() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(this.id);
-        userDTO.setLastName(this.lastName);
-        userDTO.setCompanyName(this.companyName);
-        userDTO.setEmail(this.email);
-        userDTO.setDescription(this.description);
-        userDTO.setBrief(this.brief);
-        userDTO.setAddress(this.address);
-        userDTO.setCity(this.city);
-        userDTO.setProvince(this.province);
-        userDTO.setNation(this.nation);
-        userDTO.setPhoneNumber(this.phoneNumber);
-        userDTO.setRating(this.rating);
-        userDTO.setImageLink(this.imageLink);
-        return finalizeDTOProcess(userDTO);
+    @Override
+    public DataTransferObject createBaseDTO(){
+        return new BaseUserDTO();
     }
 
-    public User toUpdateEntity(UserDTO userDTO) {
-        this.firstName = userDTO.getFirstName();
-        this.lastName = userDTO.getLastName();
-        this.companyName = userDTO.getCompanyName();
-        this.email = userDTO.getEmail();
-        this.roleId = userDTO.getRoleId();
-        this.description = userDTO.getDescription();
-        this.brief = userDTO.getBrief();
-        this.skillList = userDTO.getSkillList().stream().map(SkillDTO::getId).collect(Collectors.toList());
-        this.availabilityDays = userDTO.getAvailabilityDays();
-        this.availabilityHourSlots = userDTO.getAvailabilityHourSlots();
-        this.availabilityCities = userDTO.getAvailabilityCities();
-        this.address = userDTO.getAddress();
-        this.city = userDTO.getCity();
-        this.province = userDTO.getProvince();
-        this.nation = userDTO.getNation();
-        this.phoneNumber = userDTO.getPhoneNumber();
-        this.imageLink = userDTO.getImageLink();
-
-        this.subscriptionName = userDTO.getSubscriptionName();
-        this.subscriptionImageLink = userDTO.getSubscriptionImageLink();
-        this.advertisementLeft = userDTO.getAdvertisementLeft();
-        this.expiringSubscriptionDate = userDTO.getExpiringSubscriptionDate();
-        this.searchEnabled = userDTO.isSearchEnabled();
-        this.createAdvertisementEnabled = userDTO.isCreateAdvertisementEnabled();
-
-
-        this.companyTypeId = userDTO.getCompanyTypeId();
-        this.verified = userDTO.isVerified();
-        this.influencedUserList = userDTO.getInfluencedUserList();
-
-        this.rating = userDTO.getRating();
-        return this;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
     }
 
-    private UserDTO finalizeDTOProcess(UserDTO userDTO) {
-        userDTO.setFirstName(this.firstName);
-        userDTO.setRoleId(this.roleId);
-        userDTO.setSkillIds(this.skillList);
-        userDTO.setAvailabilityDays(this.availabilityDays != null ? this.availabilityDays : new ArrayList<>());
-        userDTO.setAvailabilityHourSlots(this.availabilityHourSlots != null ? this.availabilityHourSlots : new ArrayList<>());
-        userDTO.setAvailabilityCities(this.availabilityCities != null ? this.availabilityCities : new ArrayList<>());
-
-        userDTO.setSubscriptionName(this.subscriptionName);
-        userDTO.setSubscriptionImageLink(this.subscriptionImageLink);
-        userDTO.setAdvertisementLeft(this.advertisementLeft);
-        userDTO.setExpiringSubscriptionDate(this.expiringSubscriptionDate);
-        userDTO.setSearchEnabled(this.searchEnabled);
-        userDTO.setCreateAdvertisementEnabled(this.createAdvertisementEnabled);
-
-        userDTO.setCompanyTypeId(this.companyTypeId);
-        userDTO.setVerified(this.verified);
-        userDTO.setRating(this.rating);
-        userDTO.setInfluencedUserList(this.influencedUserList);
-        return userDTO;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, email);
     }
-
-
 }

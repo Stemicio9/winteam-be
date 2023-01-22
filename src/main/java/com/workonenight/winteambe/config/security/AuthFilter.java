@@ -1,9 +1,7 @@
 package com.workonenight.winteambe.config.security;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.workonenight.winteambe.service.other.FirebaseService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -13,8 +11,6 @@ import javax.servlet.http.HttpServletResponse;
 @Slf4j
 public class AuthFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private FirebaseService firebaseService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) {

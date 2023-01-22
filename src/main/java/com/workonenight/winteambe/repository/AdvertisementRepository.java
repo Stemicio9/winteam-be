@@ -9,5 +9,8 @@ public interface AdvertisementRepository extends ResourceRepository<Advertisemen
 
     List<Advertisement> findAllByPublisherUserId(String publisherUserId);
 
+    List<Advertisement> findAllByCandidateUserList_Id(String userId);
+
+    List<Advertisement> findAllBySkill_Name(String skill);
 
 }

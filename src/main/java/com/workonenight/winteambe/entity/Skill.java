@@ -1,6 +1,8 @@
 package com.workonenight.winteambe.entity;
 
 import com.workonenight.winteambe.dto.SkillDTO;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
+import com.workonenight.winteambe.entity.interfaces.Transferrable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -11,7 +13,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @Document(collection = "skills")
-public class Skill implements Serializable {
+public class Skill implements Serializable, Transferrable {
 
     @Id
     private String id;
@@ -38,4 +40,8 @@ public class Skill implements Serializable {
         return this;
     }
 
+    @Override
+    public DataTransferObject asDTO() {
+        return new SkillDTO();
+    }
 }

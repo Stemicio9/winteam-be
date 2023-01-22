@@ -1,10 +1,11 @@
 package com.workonenight.winteambe.dto;
 
 import com.workonenight.winteambe.entity.Category;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
 import lombok.Data;
 
 @Data
-public class CategoryDTO {
+public class CategoryDTO extends DataTransferObject {
     private String id;
     private String name;
     private String imageLink;
@@ -15,5 +16,10 @@ public class CategoryDTO {
         category.setName(this.name);
         category.setImageLink(this.imageLink);
         return category;
+    }
+
+    @Override
+    public DataTransferObject createBaseDTO(){
+        return new CategoryDTO();
     }
 }

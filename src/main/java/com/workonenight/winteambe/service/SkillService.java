@@ -51,4 +51,5 @@ public class SkillService {
         log.info("Get All Skills Filtered");
         return skillRepository.findAll(query).stream().map(Skill::toDTO).collect(Collectors.toList());
     }
+
 }

@@ -1,6 +1,8 @@
 package com.workonenight.winteambe.entity;
 
 import com.workonenight.winteambe.dto.SubscriptionDTO;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
+import com.workonenight.winteambe.entity.interfaces.Transferrable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
@@ -11,7 +13,7 @@ import java.io.Serializable;
 @Data
 @NoArgsConstructor
 @Document(collection = "subscriptions")
-public class Subscription implements Serializable {
+public class Subscription implements Serializable, Transferrable {
 
     @Id
     private String id;
@@ -42,5 +44,10 @@ public class Subscription implements Serializable {
         this.price = subscriptionDTO.getPrice();
         this.imageLink = subscriptionDTO.getImageLink();
         return this;
+    }
+
+    @Override
+    public DataTransferObject asDTO() {
+        return new SubscriptionDTO();
     }
 }

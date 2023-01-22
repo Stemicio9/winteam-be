@@ -90,7 +90,7 @@ public class FilterBuilderService {
     public PageRequest getPageable(int size, int page, String order) {
 
         int pageSize = (size <= 0) ? DEFAULT_SIZE_PAGE : size;
-        int currentPage = (page <= 0) ? 1 : page;
+        int currentPage = (page < 0) ? 1 : page;
 
         try {
             if (order != null && !order.isEmpty()) {
@@ -102,15 +102,15 @@ public class FilterBuilderService {
                 String sortDirection = values.get(1);
 
                 if (sortDirection.equalsIgnoreCase("ASC")) {
-                    return PageRequest.of((currentPage - 1), pageSize, Sort.by(Sort.Direction.ASC, column));
+                    return PageRequest.of((currentPage), pageSize, Sort.by(Sort.Direction.ASC, column));
                 } else if (sortDirection.equalsIgnoreCase("DESC")) {
-                    return PageRequest.of((currentPage - 1), pageSize, Sort.by(Sort.Direction.DESC, column));
+                    return PageRequest.of((currentPage), pageSize, Sort.by(Sort.Direction.DESC, column));
                 } else {
                     throw new IllegalArgumentException(String.format("Value for param 'order' is not valid : %s , must be 'asc' or 'desc'", sortDirection));
                 }
 
             } else {
-                return PageRequest.of((currentPage - 1), pageSize);
+                return PageRequest.of((currentPage), pageSize);
             }
         } catch (Exception ex) {
             throw new BadRequestException("Cannot create condition filter " + ex.getMessage());

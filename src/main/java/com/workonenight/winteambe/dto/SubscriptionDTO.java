@@ -1,10 +1,11 @@
 package com.workonenight.winteambe.dto;
 
 import com.workonenight.winteambe.entity.Subscription;
+import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
 import lombok.Data;
 
 @Data
-public class SubscriptionDTO {
+public class SubscriptionDTO extends DataTransferObject {
 
     private String id;
     private String name;
@@ -26,5 +27,10 @@ public class SubscriptionDTO {
         subscription.setCreateAdvertisementEnabled(this.createAdvertisementEnabled);
         subscription.setImageLink(this.imageLink);
         return subscription;
+    }
+
+    @Override
+    public DataTransferObject createBaseDTO(){
+        return new SubscriptionDTO();
     }
 }

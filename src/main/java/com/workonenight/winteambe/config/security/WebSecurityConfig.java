@@ -1,5 +1,7 @@
 package com.workonenight.winteambe.config.security;
 
+import com.workonenight.winteambe.entity.annotations.anonymous.InterceptingMethods;
+import com.workonenight.winteambe.utils.Utils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -34,6 +36,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().anyRequest().permitAll();
 
         http.addFilterBefore(authenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+    }
+
+    @Bean
+    public Utils getUtils() {
+        return new Utils();
+    }
+
+    @Bean
+    public InterceptingMethods getInterceptingMethods() {
+        return new InterceptingMethods();
     }
 
 

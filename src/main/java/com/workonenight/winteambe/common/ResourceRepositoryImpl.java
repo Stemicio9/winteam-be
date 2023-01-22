@@ -32,7 +32,6 @@ public class ResourceRepositoryImpl<T, I extends Serializable> extends SimpleMon
         }
         long total = mongoOperations.count(query, entityInformation.getJavaType(), entityInformation.getCollectionName());
         List<T> content = mongoOperations.find(query.with(pageable), entityInformation.getJavaType(), entityInformation.getCollectionName());
-
         return new PageImpl<T>(content, pageable, total);
     }
 
@@ -43,6 +42,23 @@ public class ResourceRepositoryImpl<T, I extends Serializable> extends SimpleMon
             throw new IllegalArgumentException("Query must not be null!");
         }
         return mongoOperations.find(query, entityInformation.getJavaType(), entityInformation.getCollectionName());
+    }
+
+    private Page<T> extractPage(Pageable pageable, List<T> content, long total){
+        int pageSize = pageable.getPageSize();
+        int currentPage = pageable.getPageNumber();
+        int startItem = currentPage * pageSize;
+        List<T> list;
+
+        if (content.size() < startItem) {
+            list = List.of();
+        } else {
+            int toIndex = Math.min(startItem + pageSize, content.size());
+            list = content.subList(startItem, toIndex);
+        }
+
+        return new PageImpl<>(list, Pageable.unpaged(), total);
+
     }
 
 

@@ -3,18 +3,23 @@ package com.workonenight.winteambe.service;
 import com.workonenight.winteambe.dto.SubscriptionDTO;
 import com.workonenight.winteambe.entity.Subscription;
 import com.workonenight.winteambe.repository.SubscriptionRepository;
+import com.workonenight.winteambe.service.other.FirebaseService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class SubscriptionService {
 
     private final SubscriptionRepository subscriptionRepository;
+    private final FirebaseService firebaseService;
 
-    public SubscriptionService(SubscriptionRepository subscriptionRepository) {
+    public SubscriptionService(SubscriptionRepository subscriptionRepository, FirebaseService firebaseService) {
         this.subscriptionRepository = subscriptionRepository;
+        this.firebaseService = firebaseService;
     }
 
     public List<SubscriptionDTO> getAllSubscriptions() {
@@ -43,4 +48,7 @@ public class SubscriptionService {
     public boolean existsById(String id) {
         return subscriptionRepository.existsById(id);
     }
+
+
+
 }
