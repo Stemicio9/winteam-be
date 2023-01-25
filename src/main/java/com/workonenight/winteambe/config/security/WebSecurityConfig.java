@@ -1,6 +1,5 @@
 package com.workonenight.winteambe.config.security;
 
-import com.workonenight.winteambe.entity.annotations.anonymous.InterceptingMethods;
 import com.workonenight.winteambe.utils.Utils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -43,10 +42,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return new Utils();
     }
 
-    @Bean
+    /*@Bean
     public InterceptingMethods getInterceptingMethods() {
         return new InterceptingMethods();
-    }
+    }*/
 
 
 }

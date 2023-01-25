@@ -1,6 +1,7 @@
 package com.workonenight.winteambe.service;
 
 import com.workonenight.winteambe.dto.AdvertisementDTO;
+import com.workonenight.winteambe.dto.CanIDTO;
 import com.workonenight.winteambe.entity.Advertisement;
 import com.workonenight.winteambe.entity.User;
 import com.workonenight.winteambe.entity.interfaces.DataTransferObject;
@@ -57,7 +58,8 @@ public class AdvertisementService {
     public Advertisement createAdvertisement(HttpServletRequest request, AdvertisementDTO advertisementDTO) throws UserNotAuthenticatedException {
         log.info("Creating advertisement");
         User user = userService.getMe(request);
-        if (user != null) {
+        CanIDTO canIDTO = userService.canI(request, "createAdvertisement");
+        if (canIDTO.isResponse() && user != null) {
             Advertisement advertisement = advertisementDTO.toEntity();
             advertisement.setId(null);
             Utils.checkHourSlot(advertisement.getHourSlot());
@@ -72,7 +74,7 @@ public class AdvertisementService {
             log.info("Saving advertisement...");
             return advertisementRepository.save(advertisement);
         } else {
-            log.error("User not found, can't create advertisement");
+            log.error("User not found or without appropriate subscription. Can't create advertisement");
             throw new UserNotAuthenticatedException();
         }
     }
